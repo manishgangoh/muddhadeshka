@@ -1,5 +1,6 @@
 import pg from "pg";
 import { createHash } from "node:crypto";
+import { slugify } from "transliteration";
 
 const { Pool } = pg;
 
@@ -25,9 +26,16 @@ export async function query(text, params) {
   return res.rows;
 }
 
-// Stable short slug from a guid/link → used for /khabar/[slug]
-export function slugFor(guidOrLink) {
-  return createHash("sha1").update(guidOrLink || "").digest("base64url").slice(0, 12);
+// SEO-friendly, unique slug from the title → /khabar/twisha-sharma-maut-mamle-xxxxxx
+// Readable keywords (transliterated Hindi) + a short hash of the guid for uniqueness.
+export function slugFor(title, guid) {
+  let base = slugify(title || "", { lowercase: true, separator: "-" })
+    .replace(/aa+/g, "a").replace(/ii+/g, "i").replace(/uu+/g, "u")
+    .replace(/oo+/g, "o").replace(/ee+/g, "e")
+    .replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  base = base.split("-").filter(Boolean).slice(0, 8).join("-").slice(0, 70).replace(/-$/, "");
+  const id = createHash("sha1").update(guid || title || "").digest("base64url").slice(0, 6);
+  return base ? `${base}-${id}` : id;
 }
 
 function toDate(v) {
@@ -47,7 +55,7 @@ export async function upsertArticles(items) {
     const guid = it.guid || it.link;
     if (!guid || !it.title || !it.link) continue;
     rows.push(`($${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++})`);
-    values.push(guid, it.link, slugFor(guid), it.title, it.summary || null, it.image || null,
+    values.push(guid, it.link, slugFor(it.title, guid), it.title, it.summary || null, it.image || null,
       it.source || null, it.category || null, it.lang || "hi", it.type || "article", toDate(it.publishedAt));
   }
   if (!rows.length) return 0;
@@ -77,10 +85,10 @@ export async function getArticleBySlug(slug) {
   return rows[0] || null;
 }
 
-export async function saveArticleContent(slug, { aiTitle, body, keyPoints, sources }) {
+export async function saveArticleContent(slug, { aiTitle, body, keyPoints, sources, metaTitle, metaDesc }) {
   await pool.query(
-    `update articles set ai_title=$2, full_content=$3, key_points=$4, ai_sources=$5, ai_at=now() where slug=$1`,
-    [slug, aiTitle || null, body || null, JSON.stringify(keyPoints || []), JSON.stringify(sources || [])]
+    `update articles set ai_title=$2, full_content=$3, key_points=$4, ai_sources=$5, meta_title=$6, meta_desc=$7, ai_at=now() where slug=$1`,
+    [slug, aiTitle || null, body || null, JSON.stringify(keyPoints || []), JSON.stringify(sources || []), metaTitle || null, metaDesc || null]
   );
 }
 

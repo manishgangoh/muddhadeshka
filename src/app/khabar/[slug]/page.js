@@ -10,13 +10,28 @@ import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://muddhadeshka.vercel.app";
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const a = await getArticleBySlug(slug);
   if (!a) return { title: "मुद्दा देश का" };
+
+  const title = a.meta_title || a.ai_title || a.title;
+  const description = (a.meta_desc || a.full_content || a.summary || "").replace(/\s+/g, " ").slice(0, 160);
+  const url = `${SITE}/khabar/${a.slug}`;
+  const images = a.image ? [a.image] : [`${SITE}/logo.png`];
+
   return {
-    title: `${a.ai_title || a.title} — मुद्दा देश का`,
-    description: (a.full_content || a.summary || "").slice(0, 160),
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title, description, url, type: "article", siteName: "मुद्दा देश का",
+      locale: "hi_IN", images,
+      publishedTime: a.published_at ? new Date(a.published_at).toISOString() : undefined,
+    },
+    twitter: { card: "summary_large_image", title, description, images },
   };
 }
 
@@ -40,8 +55,8 @@ export default async function ArticlePage({ params }) {
 
       const r = await rewriteArticle({ title: a.title, summary: a.summary, source: a.source_name, lang: a.lang, sources });
       if (r.body) {
-        await saveArticleContent(slug, { aiTitle: r.title, body: r.body, keyPoints: r.keyPoints, sources: r.mergedSources });
-        a = { ...a, ai_title: r.title, full_content: r.body, key_points: r.keyPoints, ai_sources: r.mergedSources };
+        await saveArticleContent(slug, { aiTitle: r.title, body: r.body, keyPoints: r.keyPoints, sources: r.mergedSources, metaTitle: r.metaTitle, metaDesc: r.metaDesc });
+        a = { ...a, ai_title: r.title, full_content: r.body, key_points: r.keyPoints, ai_sources: r.mergedSources, meta_title: r.metaTitle, meta_desc: r.metaDesc };
       }
     } catch {
       // AI/scrape unavailable → fall back to the source summary below
@@ -55,8 +70,28 @@ export default async function ArticlePage({ params }) {
   const related = await getRelated({ lang, category: a.category, excludeSlug: slug, limit: 6 });
   const catLabel = CAT[a.category]?.label || "";
 
+  const published = a.published_at ? new Date(a.published_at).toISOString() : undefined;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: (a.ai_title || a.title || "").slice(0, 110),
+    description: (a.meta_desc || a.summary || "").replace(/\s+/g, " ").slice(0, 200),
+    image: a.image ? [a.image] : [`${SITE}/logo.png`],
+    datePublished: published,
+    dateModified: a.ai_at ? new Date(a.ai_at).toISOString() : published,
+    inLanguage: lang,
+    author: { "@type": "Organization", name: "मुद्दा देश का" },
+    publisher: {
+      "@type": "Organization",
+      name: "मुद्दा देश का",
+      logo: { "@type": "ImageObject", url: `${SITE}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE}/khabar/${a.slug}` },
+  };
+
   return (
     <div className="min-h-full bg-zinc-100 text-zinc-900">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <SiteHeader lang={lang} basePath="/" activeCat={a.category} />
 
       <main className="mx-auto max-w-3xl px-4 py-6">

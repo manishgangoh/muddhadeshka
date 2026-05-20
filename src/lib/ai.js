@@ -104,14 +104,16 @@ function parseStructured(text) {
     const e = end ? text.indexOf(end, from) : -1;
     return text.slice(from, e === -1 ? undefined : e).trim();
   };
-  const title = clean(grab("###TITLE###", "###BODY###"));
+  const title = clean(grab("###TITLE###", "###METATITLE###"));
+  const metaTitle = clean(grab("###METATITLE###", "###METADESC###"));
+  const metaDesc = clean(grab("###METADESC###", "###BODY###"));
   const body = clean(grab("###BODY###", "###POINTS###"));
   const pointsRaw = grab("###POINTS###", null);
   const keyPoints = pointsRaw
     .split("\n")
     .map((l) => clean(l.replace(/^[-*•\d.\s]+/, "")))
     .filter((l) => l && !/^<\/?[a-z_]+>$/i.test(l));
-  return { title, body, keyPoints };
+  return { title, metaTitle, metaDesc, body, keyPoints };
 }
 
 const LANG_NAME = { hi: "हिन्दी (Hindi)", en: "English", mr: "Marathi", bn: "Bengali", ta: "Tamil", te: "Telugu", gu: "Gujarati", kn: "Kannada", ml: "Malayalam", pa: "Punjabi" };
@@ -145,9 +147,13 @@ export async function rewriteArticle({ title, summary, source, lang = "hi", sour
 
   const user = `${sourceBlock}
 
-Write an ORIGINAL, DETAILED news article in ${langName}, in your own words. Cover all the important information — do not over-summarise. Use EXACTLY this format, keep the ### markers, and write content directly on the lines after each marker (no angle brackets or placeholders):
+Write an ORIGINAL, DETAILED news article in ${langName}, in your own words. Cover all the important information — do not over-summarise. Also write SEO fields. Use EXACTLY this format, keep the ### markers, and write content directly on the lines after each marker (no angle brackets or placeholders):
 ###TITLE###
 a clear rewritten headline in ${langName}
+###METATITLE###
+an SEO page title in ${langName}, max 60 characters, most important keywords first
+###METADESC###
+an SEO meta description in ${langName}, 140-155 characters, compelling and keyword-rich
 ###BODY###
 ${lengthHint} in ${langName}, in 4-7 well-structured paragraphs
 ###POINTS###
@@ -161,8 +167,11 @@ ${lengthHint} in ${langName}, in 4-7 well-structured paragraphs
     { temperature: 0.6, maxTokens: 3000 }
   );
   const parsed = parseStructured(text);
+  const finalTitle = parsed.title || title;
   return {
-    title: parsed.title || title,
+    title: finalTitle,
+    metaTitle: (parsed.metaTitle || finalTitle).slice(0, 65),
+    metaDesc: (parsed.metaDesc || parsed.body || "").replace(/\s+/g, " ").slice(0, 160),
     body: parsed.body || "",
     keyPoints: parsed.keyPoints.length ? parsed.keyPoints : [],
     provider,
