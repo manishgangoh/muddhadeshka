@@ -42,12 +42,12 @@ export function Card({ it, lang = "hi" }) {
       <div className="aspect-video overflow-hidden bg-zinc-100">
         {it.image
           ? <img src={it.image} alt="" loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-          : <div className="flex h-full items-center justify-center text-sm text-zinc-400">{it.source}</div>}
+          : <div className="flex h-full items-center justify-center text-sm font-semibold text-zinc-300">मुद्दा देश का</div>}
       </div>
       <div className="flex flex-1 flex-col p-3.5">
         <Tag slug={it.category} />
         <h3 className="mt-1.5 font-semibold leading-snug text-zinc-900 group-hover:text-brand-blue line-clamp-3">{it.title}</h3>
-        <span className="mt-auto pt-3 text-xs text-zinc-400">{it.source} · {timeAgoHi(it.publishedAt)}</span>
+        <span className="mt-auto pt-3 text-xs text-zinc-400">{timeAgoHi(it.publishedAt)}</span>
       </div>
     </a>
   );

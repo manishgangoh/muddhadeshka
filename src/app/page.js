@@ -45,7 +45,7 @@ export default async function Home({ searchParams }) {
                 <Tag slug={lead.category} />
                 <h2 className="mt-2 text-2xl font-bold leading-snug text-white group-hover:underline md:text-3xl">{lead.title}</h2>
                 <p className="mt-1 line-clamp-2 text-sm text-zinc-200">{lead.summary}</p>
-                <span className="mt-2 block text-xs text-zinc-300">{lead.source} · {timeAgoHi(lead.publishedAt)}</span>
+                <span className="mt-2 block text-xs text-zinc-300">{timeAgoHi(lead.publishedAt)}</span>
               </div>
             </a>
           )}
@@ -58,7 +58,7 @@ export default async function Home({ searchParams }) {
                 <div className="h-16 w-20 shrink-0 overflow-hidden rounded bg-zinc-100">
                   {it.image
                     ? <img src={it.image} alt="" loading="lazy" className="h-full w-full object-cover" />
-                    : <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">{it.source}</div>}
+                    : <div className="flex h-full items-center justify-center text-center text-[9px] font-semibold text-zinc-300">मुद्दा<br/>देश का</div>}
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold leading-snug text-zinc-800 group-hover:text-brand-blue line-clamp-3">{it.title}</h4>

@@ -71,13 +71,8 @@ export default async function ArticlePage({ params }) {
           <h1 className="mt-2 text-2xl font-extrabold leading-tight text-zinc-900 sm:text-3xl">
             {a.ai_title || a.title}
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
-            <span>{a.source_name}</span> · <span>{timeAgoHi(a.published_at)}</span>
-            {mergedSources.length > 1 && (
-              <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-xs font-medium text-brand-blue">
-                {mergedSources.length} स्रोतों के आधार पर
-              </span>
-            )}
+          <div className="mt-2 text-sm text-zinc-500">
+            <span>{timeAgoHi(a.published_at)}</span>
           </div>
 
           {a.image && (
@@ -126,7 +121,7 @@ export default async function ArticlePage({ params }) {
                   <div className="h-16 w-20 shrink-0 overflow-hidden rounded bg-zinc-100">
                     {r.image
                       ? <img src={r.image} alt="" loading="lazy" className="h-full w-full object-cover" />
-                      : <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">{r.source_name}</div>}
+                      : <div className="flex h-full items-center justify-center text-center text-[9px] font-semibold text-zinc-300">मुद्दा<br/>देश का</div>}
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold leading-snug text-zinc-800 group-hover:text-brand-blue line-clamp-3">{r.ai_title || r.title}</h3>
