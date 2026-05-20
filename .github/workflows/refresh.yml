@@ -4,7 +4,7 @@ name: Refresh news
 # Requires repo secrets: SITE_URL (e.g. https://muddhadeshka.com) and CRON_SECRET.
 on:
   schedule:
-    - cron: "*/10 * * * *" # every 10 minutes
+    - cron: "*/5 * * * *" # every 5 minutes (GitHub Actions minimum)
   workflow_dispatch: {}
 
 jobs:
