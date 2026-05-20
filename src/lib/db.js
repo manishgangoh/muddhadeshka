@@ -13,7 +13,12 @@ export const pool =
     max: 5,
     idleTimeoutMillis: 30000,
   });
-if (!g._mdkPool) g._mdkPool = pool;
+if (!g._mdkPool) {
+  // The Supabase pooler closes idle connections; without this handler pg emits an
+  // unhandled 'error' event that crashes the process. Just log and let the pool recover.
+  pool.on("error", (err) => console.error("[pg pool]", err.message));
+  g._mdkPool = pool;
+}
 
 export async function query(text, params) {
   const res = await pool.query(text, params);
