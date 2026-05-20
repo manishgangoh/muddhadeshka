@@ -1,0 +1,70 @@
+import { getConfig, logoExists } from "@/lib/news";
+import { Social, hrefFor } from "@/components/ui";
+
+// basePath = current page path ("/" or "/khel") so language switch stays on same page
+// activeCat = slug of current category, or "home"
+export default function SiteHeader({ lang = "hi", basePath = "/", activeCat = "home" }) {
+  const cfg = getConfig();
+  const today = new Date().toLocaleDateString("hi-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  return (
+    <>
+      {/* Top utility bar */}
+      <div className="bg-brand-blue-dark text-blue-100">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-1.5 text-xs">
+          <span className="hidden shrink-0 md:block">{today}</span>
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex items-center gap-1 overflow-x-auto whitespace-nowrap">
+              <span className="mr-1 hidden shrink-0 text-blue-300 sm:inline">भाषा:</span>
+              {cfg.languages.map((l) => (
+                <a key={l.code} href={hrefFor(basePath, l.code)}
+                   className={`shrink-0 rounded px-1.5 py-0.5 transition ${
+                     l.code === lang ? "bg-white font-bold text-brand-blue-dark" : "text-blue-100 hover:text-white"
+                   }`}>
+                  {l.name}
+                </a>
+              ))}
+            </div>
+            <span className="hidden h-3 w-px shrink-0 bg-blue-700 sm:block" />
+            <Social links={cfg.site.social} />
+          </div>
+        </div>
+      </div>
+
+      {/* Masthead */}
+      <header className="bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+          <a href={hrefFor("/", lang)} className="flex items-center gap-3">
+            {logoExists() ? (
+              <img src="/logo.png" alt="मुद्दा देश का — muddhadeshka.com" className="h-16 w-auto" />
+            ) : (
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                <span className="text-brand-red">मुद्दा</span> <span className="text-brand-blue">देश का</span>
+              </h1>
+            )}
+            <span className="hidden text-xs tracking-wide text-zinc-500 sm:block">हर खबर · हर राज्य · हर भाषा</span>
+          </a>
+          <span className="hidden items-center gap-1.5 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold text-brand-red sm:flex">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-brand-red" /> लाइव अपडेट
+          </span>
+        </div>
+      </header>
+
+      {/* Sticky category nav */}
+      <nav className="sticky top-0 z-20 bg-brand-blue shadow">
+        <div className="mx-auto flex max-w-6xl flex-wrap gap-x-5 gap-y-1 px-4 py-2.5 text-sm font-semibold text-white">
+          <a href={hrefFor("/", lang)}
+             className={`pb-0.5 transition hover:text-white ${activeCat === "home" ? "border-b-2 border-white" : "text-blue-100 hover:border-b-2 hover:border-white"}`}>
+            होम
+          </a>
+          {cfg.categories.map((c) => (
+            <a key={c.slug} href={hrefFor(`/${c.slug}`, lang)}
+               className={`pb-0.5 transition hover:text-white ${activeCat === c.slug ? "border-b-2 border-white" : "text-blue-100 hover:border-b-2 hover:border-white"}`}>
+              {c.name_hi}
+            </a>
+          ))}
+        </div>
+      </nav>
+    </>
+  );
+}

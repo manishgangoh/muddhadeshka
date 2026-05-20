@@ -1,0 +1,98 @@
+{
+  "site": {
+    "name": "Mudda Desh Ka",
+    "domain": "muddhadeshka.com",
+    "defaultLanguage": "hi",
+    "country": "IN",
+    "social": {
+      "instagram": "https://www.instagram.com/muddhadeshka/",
+      "youtube": "#",
+      "facebook": "#",
+      "twitter": "#",
+      "whatsapp": "#"
+    }
+  },
+
+  "languages": [
+    { "code": "hi", "name": "हिन्दी", "name_en": "Hindi" },
+    { "code": "en", "name": "English", "name_en": "English" },
+    { "code": "mr", "name": "मराठी", "name_en": "Marathi" },
+    { "code": "bn", "name": "বাংলা", "name_en": "Bengali" },
+    { "code": "ta", "name": "தமிழ்", "name_en": "Tamil" },
+    { "code": "te", "name": "తెలుగు", "name_en": "Telugu" },
+    { "code": "gu", "name": "ગુજરાતી", "name_en": "Gujarati" },
+    { "code": "kn", "name": "ಕನ್ನಡ", "name_en": "Kannada" },
+    { "code": "ml", "name": "മലയാളം", "name_en": "Malayalam" },
+    { "code": "pa", "name": "ਪੰਜਾਬੀ", "name_en": "Punjabi" }
+  ],
+
+  "categories": [
+    { "slug": "rajniti",    "name_hi": "राजनीति",   "name_en": "Politics",       "googleTopic": "NATION" },
+    { "slug": "desh",       "name_hi": "देश",        "name_en": "National",       "googleTopic": "NATION" },
+    { "slug": "khel",       "name_hi": "खेल",        "name_en": "Sports",         "googleTopic": "SPORTS" },
+    { "slug": "manoranjan", "name_hi": "मनोरंजन",    "name_en": "Entertainment",  "googleTopic": "ENTERTAINMENT" },
+    { "slug": "business",   "name_hi": "बिज़नेस",     "name_en": "Business",       "googleTopic": "BUSINESS" },
+    { "slug": "tech",       "name_hi": "टेक्नोलॉजी", "name_en": "Technology",     "googleTopic": "TECHNOLOGY" },
+    { "slug": "duniya",     "name_hi": "दुनिया",     "name_en": "World",          "googleTopic": "WORLD" },
+    { "slug": "swasthya",   "name_hi": "स्वास्थ्य",   "name_en": "Health",         "googleTopic": "HEALTH" },
+    { "slug": "vigyan",     "name_hi": "विज्ञान",    "name_en": "Science",        "googleTopic": "SCIENCE" }
+  ],
+
+  "googleNews": {
+    "_note": "Sabse flexible source — kisi bhi language/city/topic ke liye. {LANG}=hi/en/ta..., {TOPIC}=NATION/SPORTS/... , {QUERY}=URL-encoded search",
+    "topicTemplate": "https://news.google.com/rss/headlines/section/topic/{TOPIC}?hl={LANG}-IN&gl=IN&ceid=IN:{LANG}",
+    "searchTemplate": "https://news.google.com/rss/search?q={QUERY}&hl={LANG}-IN&gl=IN&ceid=IN:{LANG}"
+  },
+
+  "rssFeeds": [
+    { "source": "Times of India", "lang": "en", "category": "rajniti",    "url": "https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms" },
+    { "source": "Times of India", "lang": "en", "category": "khel",       "url": "https://timesofindia.indiatimes.com/rssfeeds/4719148.cms" },
+    { "source": "Times of India", "lang": "en", "category": "manoranjan", "url": "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms" },
+    { "source": "Times of India", "lang": "en", "category": "business",   "url": "https://timesofindia.indiatimes.com/rssfeeds/1898055.cms" },
+    { "source": "Times of India", "lang": "en", "category": "tech",       "url": "https://timesofindia.indiatimes.com/rssfeeds/66949542.cms" },
+
+    { "source": "NDTV",   "lang": "en", "category": "rajniti",    "url": "https://feeds.feedburner.com/ndtvnews-india-news" },
+    { "source": "NDTV",   "lang": "en", "category": "khel",       "url": "https://feeds.feedburner.com/ndtvsports-latest" },
+    { "source": "NDTV",   "lang": "en", "category": "manoranjan", "url": "https://feeds.feedburner.com/ndtvmovies-latest" },
+    { "source": "NDTV",   "lang": "en", "category": "business",   "url": "https://feeds.feedburner.com/ndtvprofit-latest" },
+
+    { "source": "NDTV Hindi", "lang": "hi", "category": "desh", "general": true, "url": "https://feeds.feedburner.com/ndtvkhabar-latest" },
+    { "source": "TV9 भारतवर्ष", "lang": "hi", "category": "desh", "general": true, "url": "https://www.tv9hindi.com/feed" },
+    { "source": "News18 हिंदी", "lang": "hi", "category": "desh", "general": true, "url": "https://hindi.news18.com/rss/khabar/nation/nation.xml" },
+    { "source": "ABP News", "lang": "hi", "category": "rajniti",    "url": "https://www.abplive.com/news/india/feed" },
+    { "source": "ABP News", "lang": "hi", "category": "khel",       "url": "https://www.abplive.com/sports/feed" },
+    { "source": "ABP News", "lang": "hi", "category": "manoranjan", "url": "https://www.abplive.com/entertainment/feed" },
+    { "source": "ABP News", "lang": "hi", "category": "business",   "url": "https://www.abplive.com/business/feed" },
+
+    { "source": "The Hindu",       "lang": "en", "category": "rajniti", "url": "https://www.thehindu.com/news/national/feeder/default.rss" },
+    { "source": "The Hindu",       "lang": "en", "category": "khel",    "url": "https://www.thehindu.com/sport/feeder/default.rss" },
+
+    { "source": "Indian Express",  "lang": "en", "category": "rajniti",    "url": "https://indianexpress.com/section/india/feed/" },
+    { "source": "Indian Express",  "lang": "en", "category": "khel",       "url": "https://indianexpress.com/section/sports/feed/" },
+    { "source": "Indian Express",  "lang": "en", "category": "manoranjan", "url": "https://indianexpress.com/section/entertainment/feed/" }
+  ],
+
+  "youtubeChannels": [
+    { "name": "Aaj Tak",       "lang": "hi", "channelId": "UCt4t-jeY85JegMlZ-E5UWtA" },
+    { "name": "ABP News",      "lang": "hi", "channelId": "UCmphdqZNmqL72WJ2uyiNw5w" },
+    { "name": "Zee News",      "lang": "hi", "channelId": "UCIvaYmXn910QMdemBG3v1pQ" },
+    { "name": "News18 India",  "lang": "hi", "channelId": "UCpEhnqL0y41EpW2TvWAHD7Q" },
+    { "name": "NDTV",          "lang": "en", "channelId": "UCZFMm1mMw0F81Z37aaEzfUA" },
+    { "name": "India Today",   "lang": "en", "channelId": "UCYPvAwZP8pZhSMW8qs7cVCw" }
+  ],
+
+  "youtubeRssTemplate": "https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}",
+
+  "states": [
+    { "code": "up", "name_hi": "उत्तर प्रदेश", "name_en": "Uttar Pradesh", "cities": ["Lucknow", "Kanpur", "Varanasi", "Prayagraj", "Noida", "Ghaziabad", "Agra", "Meerut"] },
+    { "code": "mh", "name_hi": "महाराष्ट्र",   "name_en": "Maharashtra",   "cities": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad"] },
+    { "code": "dl", "name_hi": "दिल्ली",       "name_en": "Delhi",         "cities": ["New Delhi", "Dwarka", "Rohini"] },
+    { "code": "br", "name_hi": "बिहार",        "name_en": "Bihar",         "cities": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur"] },
+    { "code": "rj", "name_hi": "राजस्थान",     "name_en": "Rajasthan",     "cities": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer"] },
+    { "code": "mp", "name_hi": "मध्य प्रदेश",  "name_en": "Madhya Pradesh","cities": ["Bhopal", "Indore", "Gwalior", "Jabalpur"] },
+    { "code": "gj", "name_hi": "गुजरात",       "name_en": "Gujarat",       "cities": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"] },
+    { "code": "wb", "name_hi": "पश्चिम बंगाल", "name_en": "West Bengal",   "cities": ["Kolkata", "Howrah", "Durgapur", "Siliguri"] },
+    { "code": "tn", "name_hi": "तमिलनाडु",     "name_en": "Tamil Nadu",    "cities": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli"] },
+    { "code": "ka", "name_hi": "कर्नाटक",      "name_en": "Karnataka",     "cities": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi"] }
+  ]
+}

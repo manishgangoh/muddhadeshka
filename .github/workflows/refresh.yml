@@ -1,0 +1,15 @@
+name: Refresh news
+
+# Pulls fresh news into the DB on a schedule (free, runs on GitHub).
+# Requires repo secrets: SITE_URL (e.g. https://muddhadeshka.com) and CRON_SECRET.
+on:
+  schedule:
+    - cron: "*/10 * * * *" # every 10 minutes
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger /api/refresh
+        run: curl -fsS --max-time 90 "${{ secrets.SITE_URL }}/api/refresh?secret=${{ secrets.CRON_SECRET }}"
