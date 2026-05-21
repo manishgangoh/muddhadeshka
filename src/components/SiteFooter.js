@@ -42,7 +42,14 @@ export default function SiteFooter({ lang = "hi" }) {
       <div className="border-t border-blue-900 py-6 text-center text-sm">
         <p className="text-lg font-bold text-white">मुद्दा देश का</p>
         <div className="mt-3 flex justify-center"><Social links={cfg.site.social} /></div>
-        <p className="mt-3">© {new Date().getFullYear()} muddhadeshka.com · सभी खबरें मूल स्रोत से ली गई हैं</p>
+        <nav className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
+          <a href="/about" className="hover:text-white">हमारे बारे में</a>
+          <a href="/contact" className="hover:text-white">संपर्क</a>
+          <a href="/privacy" className="hover:text-white">प्राइवेसी पॉलिसी</a>
+          <a href="/terms" className="hover:text-white">नियम व शर्तें</a>
+          <a href="/disclaimer" className="hover:text-white">डिस्क्लेमर</a>
+        </nav>
+        <p className="mt-4">© {new Date().getFullYear()} muddhadeshka.com · सभी खबरें मूल स्रोत से ली गई हैं</p>
       </div>
     </footer>
   );

@@ -17,6 +17,10 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
+  const pages = ["about", "contact", "privacy", "terms", "disclaimer"].map((p) => ({
+    url: `${SITE}/${p}`, changeFrequency: "monthly", priority: 0.3,
+  }));
+
   const states = getStates().map((s) => ({ url: `${SITE}/state/${s.slug}`, changeFrequency: "hourly", priority: 0.7 }));
   const cities = getCities().map((c) => ({ url: `${SITE}/city/${c.slug}`, changeFrequency: "hourly", priority: 0.7 }));
 
@@ -38,6 +42,7 @@ export default async function sitemap() {
 
   return [
     { url: SITE, changeFrequency: "hourly", priority: 1 },
+    ...pages,
     ...categories,
     ...states,
     ...cities,
