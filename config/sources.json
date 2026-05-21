@@ -59,6 +59,7 @@
     { "source": "NDTV Hindi", "lang": "hi", "category": "desh", "general": true, "url": "https://feeds.feedburner.com/ndtvkhabar-latest" },
     { "source": "TV9 भारतवर्ष", "lang": "hi", "category": "desh", "general": true, "url": "https://www.tv9hindi.com/feed" },
     { "source": "News18 हिंदी", "lang": "hi", "category": "desh", "general": true, "url": "https://hindi.news18.com/rss/khabar/nation/nation.xml" },
+    { "source": "News18 हिंदी", "lang": "hi", "category": "desh", "general": true, "url": "https://hindi.news18.com/commonfeeds/v1/hin/rss/latest.xml" },
     { "source": "ABP News", "lang": "hi", "category": "rajniti",    "url": "https://www.abplive.com/news/india/feed" },
     { "source": "ABP News", "lang": "hi", "category": "khel",       "url": "https://www.abplive.com/sports/feed" },
     { "source": "ABP News", "lang": "hi", "category": "manoranjan", "url": "https://www.abplive.com/entertainment/feed" },
