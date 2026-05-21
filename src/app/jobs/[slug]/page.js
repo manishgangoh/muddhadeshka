@@ -26,8 +26,28 @@ export default async function JobDetailPage({ params, searchParams }) {
 
   const paragraphs = (j.description || "").split(/\n\n+|\.\s(?=[A-Z])/).map((p) => p.trim()).filter((p) => p.length > 20).slice(0, 12);
 
+  const posted = j.published_at ? new Date(j.published_at).toISOString() : new Date().toISOString();
+  const validThrough = new Date(new Date(posted).getTime() + 30 * 86400000).toISOString();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: j.title,
+    description: j.description || `${j.title}${j.company ? " at " + j.company : ""}. Apply now.`,
+    datePosted: posted,
+    validThrough,
+    employmentType: "FULL_TIME",
+    hiringOrganization: { "@type": "Organization", name: j.company || j.source || "Company" },
+    jobLocation: {
+      "@type": "Place",
+      address: { "@type": "PostalAddress", addressLocality: j.location || "India", addressCountry: "IN" },
+    },
+    directApply: false,
+    url: `${SITE}/jobs/${j.slug}`,
+  };
+
   return (
     <div className="min-h-full bg-zinc-100 text-zinc-900">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <SiteHeader lang={lang} basePath="/jobs" activeCat="home" />
 
       <main className="mx-auto max-w-3xl px-4 py-6">

@@ -26,6 +26,7 @@ export default async function sitemap() {
   const cities = getCities().map((c) => ({ url: `${SITE}/city/${c.slug}`, changeFrequency: "hourly", priority: 0.7 }));
 
   let articles = [];
+  let jobs = [];
   try {
     const rows = await query(
       `select slug, coalesce(ai_at, published_at, created_at) as lm
@@ -40,6 +41,10 @@ export default async function sitemap() {
   } catch {
     // DB unavailable → still return home + categories
   }
+  try {
+    const jr = await query(`select slug, published_at from jobs where slug is not null order by published_at desc nulls last limit 1000`);
+    jobs = jr.map((r) => ({ url: `${SITE}/jobs/${r.slug}`, lastModified: r.published_at ? new Date(r.published_at) : undefined, changeFrequency: "daily", priority: 0.6 }));
+  } catch { /* ignore */ }
 
   return [
     { url: SITE, changeFrequency: "hourly", priority: 1 },
@@ -47,6 +52,7 @@ export default async function sitemap() {
     ...categories,
     ...states,
     ...cities,
+    ...jobs,
     ...articles,
   ];
 }

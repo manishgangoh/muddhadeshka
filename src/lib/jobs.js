@@ -129,6 +129,21 @@ export async function getJobBySlug(slug) {
   return rows[0] || null;
 }
 
+// Search across ALL stored jobs by keyword (title/company) and/or location
+export async function searchJobs({ q, loc, jobType, limit = 60 }) {
+  const conds = [], vals = [];
+  let i = 1;
+  if (jobType) { conds.push(`job_type = $${i++}`); vals.push(jobType); }
+  if (q) { conds.push(`(title ilike $${i} or company ilike $${i})`); vals.push(`%${q}%`); i++; }
+  if (loc) { conds.push(`location ilike $${i++}`); vals.push(`%${loc}%`); }
+  const where = conds.length ? `where ${conds.join(" and ")}` : "";
+  const rows = await query(
+    `select * from jobs ${where} order by published_at desc nulls last limit $${i}`,
+    [...vals, limit]
+  );
+  return rows;
+}
+
 export function jobTypes() {
   return getConfig().jobTypes;
 }
