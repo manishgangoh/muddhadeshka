@@ -1,5 +1,6 @@
 import { getJobs, searchJobs, jobTypes, jobTimeAgo } from "@/lib/jobs";
 import { normalizeLang } from "@/lib/news";
+import Avatar from "@/components/Avatar";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -18,9 +19,7 @@ function JobCard({ j }) {
        className="group flex flex-col rounded-xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start gap-3">
         <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-zinc-100 ring-1 ring-zinc-200">
-          {j.image
-            ? <img src={j.image} alt="" loading="lazy" className="h-full w-full object-cover" />
-            : <div className="flex h-full items-center justify-center text-lg font-bold text-brand-red">{(j.company || j.title || "?").charAt(0)}</div>}
+          <Avatar src={j.image} label={j.company || j.title} />
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="line-clamp-2 font-bold leading-snug text-zinc-900 group-hover:text-brand-red">{j.title}</h2>

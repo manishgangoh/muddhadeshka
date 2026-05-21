@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getJobBySlug, jobTimeAgo } from "@/lib/jobs";
 import { normalizeLang } from "@/lib/news";
+import Avatar from "@/components/Avatar";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -58,9 +59,7 @@ export default async function JobDetailPage({ params, searchParams }) {
         <article className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
           <div className="flex items-start gap-4">
             <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-100 ring-1 ring-zinc-200">
-              {j.image
-                ? <img src={j.image} alt="" className="h-full w-full object-cover" />
-                : <div className="flex h-full items-center justify-center text-2xl font-bold text-brand-red">{(j.company || j.title || "?").charAt(0)}</div>}
+              <Avatar src={j.image} label={j.company || j.title} />
             </div>
             <div className="min-w-0">
               <h1 className="text-xl font-extrabold leading-snug text-zinc-900 sm:text-2xl">{j.title}</h1>

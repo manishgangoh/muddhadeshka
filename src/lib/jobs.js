@@ -64,10 +64,10 @@ async function fetchLinkedIn(keywords, location = "India") {
       const company = clean((c.match(/hidden-nested-link[^>]*>([^<]+)/) || [])[1]);
       const loc = clean((c.match(/job-search-card__location[^>]*>([^<]+)/) || [])[1]);
       const link = (c.match(/href="(https:\/\/[a-z]+\.linkedin\.com\/jobs\/view\/[^"?]+)/) || [])[1];
-      const img = (c.match(/data-delayed-url="([^"]+)"/) || [])[1];
       const dt = (c.match(/datetime="([^"]+)"/) || [])[1];
       if (!title || !link) return null;
-      return { guid: link, slug: slugFor(title + company, link), title, company, location: loc || "India", url: link, source: "LinkedIn", image: img || null, description: "", job_type: "private", publishedAt: dt || null };
+      // LinkedIn (licdn.com) logos are hotlink-protected → don't store; Avatar shows the letter
+      return { guid: link, slug: slugFor(title + company, link), title, company, location: loc || "India", url: link, source: "LinkedIn", image: null, description: "", job_type: "private", publishedAt: dt || null };
     }).filter(Boolean);
   } catch {
     return [];
@@ -114,7 +114,7 @@ const cachedJobs = unstable_cache(
     try { await upsertJobs(jobs); } catch { /* best-effort */ }
     return jobs.slice(0, 60);
   },
-  ["jobs-v4"],
+  ["jobs-v5"],
   { revalidate: 1800 }
 );
 
