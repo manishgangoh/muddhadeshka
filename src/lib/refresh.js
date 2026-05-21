@@ -1,7 +1,18 @@
 import { getConfig, feedDefsForLang, dedupe } from "./feeds.js";
 import { fetchFeed } from "./rss.js";
-import { upsertArticles } from "./db.js";
+import { upsertArticles, getArticlesNeedingHinglish, saveHinglishTitles } from "./db.js";
 import { categorize } from "./categorize.js";
+import { translateTitles } from "./ai.js";
+
+// Pre-generate Hinglish titles in the background so listing pages never run AI on load
+export async function backfillHinglishTitles(limit = 60) {
+  const rows = await getArticlesNeedingHinglish(limit);
+  if (!rows.length) return 0;
+  const titles = await translateTitles(rows.map((r) => r.title), "hinglish");
+  const pairs = rows.map((r, i) => ({ id: r.id, title_hinglish: titles[i] || r.title }));
+  await saveHinglishTitles(pairs);
+  return pairs.length;
+}
 
 export async function refreshLang(lang) {
   const cfg = getConfig();
@@ -31,5 +42,7 @@ export async function refreshLang(lang) {
 export async function refreshAllNews(langs = ["hi", "en"]) {
   const results = [];
   for (const l of langs) results.push(await refreshLang(l));
+  // background: pre-generate Hinglish titles for any new/untranslated articles
+  try { await backfillHinglishTitles(60); } catch { /* best-effort */ }
   return results;
 }

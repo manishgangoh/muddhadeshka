@@ -127,6 +127,25 @@ export async function saveTranslation(slug, lang, { title, body, keyPoints }) {
   );
 }
 
+// Articles whose Hinglish title hasn't been generated yet (newest first)
+export async function getArticlesNeedingHinglish(limit = 60) {
+  return query(
+    `select id, title from articles where title_hinglish is null order by published_at desc nulls last limit $1`,
+    [limit]
+  );
+}
+
+export async function saveHinglishTitles(pairs) {
+  if (!pairs.length) return;
+  const ph = [], vals = [];
+  let i = 1;
+  for (const p of pairs) { ph.push(`($${i++}::bigint, $${i++}::text)`); vals.push(p.id, p.title_hinglish); }
+  await pool.query(
+    `update articles a set title_hinglish = v.t from (values ${ph.join(",")}) as v(id, t) where a.id = v.id`,
+    vals
+  );
+}
+
 export async function countArticles() {
   const rows = await query(`select count(*)::int as n from articles`);
   return rows[0]?.n || 0;

@@ -3,26 +3,19 @@ import { fetchMany, googleNewsSearchUrl } from "./rss.js";
 import { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, feedDefsForLang, dedupe, timeAgoHi } from "./feeds.js";
 import { getArticles, getArticleBySlug, upsertArticles, slugFor } from "./db.js";
 import { findCity, findState } from "./locations.js";
-import { translateTitles } from "./ai.js";
-
-// Replace item titles with Hinglish (batch AI, used for listing pages in Hinglish mode)
-async function toHinglish(items) {
-  if (!items.length) return items;
-  const titles = await translateTitles(items.map((it) => it.title), "hinglish");
-  return items.map((it, i) => ({ ...it, title: titles[i] || it.title }));
-}
 
 // Re-export shared helpers so existing imports from "@/lib/news" keep working
 export { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, dedupe, timeAgoHi, getArticleBySlug };
 
 const REVALIDATE = 45; // serve DB reads from cache for ~45s so fresh news shows quickly
 
-// DB row -> the item shape used by the UI (Card/Tag/etc.)
-function dbToItem(row) {
+// DB row -> the item shape used by the UI. In Hinglish mode use the pre-stored
+// Hinglish title (generated in the background by the cron) — NO AI on page load.
+function dbToItem(row, hinglish = false) {
   return {
     guid: row.guid,
     slug: row.slug,
-    title: row.title,
+    title: hinglish ? row.title_hinglish || row.title : row.title,
     summary: row.summary,
     link: row.source_url,
     image: row.image,
@@ -43,25 +36,23 @@ async function liveNews(lang) {
 
 const cachedNews = unstable_cache(
   async (lang) => {
-    const fetchLang = lang === "hinglish" ? "hi" : lang;
+    const hinglish = lang === "hinglish";
+    const fetchLang = hinglish ? "hi" : lang;
     const rows = await getArticles({ lang: fetchLang, limit: 120 });
-    let items = rows.length > 0 ? rows.map(dbToItem) : await liveNews(fetchLang);
-    if (lang === "hinglish") items = await toHinglish(items.slice(0, 60));
-    return items;
+    return rows.length > 0 ? rows.map((r) => dbToItem(r, hinglish)) : await liveNews(fetchLang);
   },
-  ["news-by-lang-v3"],
+  ["news-by-lang-v4"],
   { revalidate: REVALIDATE }
 );
 
 const cachedCategory = unstable_cache(
   async (category, lang) => {
-    const fetchLang = lang === "hinglish" ? "hi" : lang;
+    const hinglish = lang === "hinglish";
+    const fetchLang = hinglish ? "hi" : lang;
     const rows = await getArticles({ lang: fetchLang, category, limit: 60 });
-    let items = rows.length > 0 ? rows.map(dbToItem) : (await liveNews(fetchLang)).filter((it) => it.category === category);
-    if (lang === "hinglish") items = await toHinglish(items.slice(0, 40));
-    return items;
+    return rows.length > 0 ? rows.map((r) => dbToItem(r, hinglish)) : (await liveNews(fetchLang)).filter((it) => it.category === category);
   },
-  ["news-by-cat-v3"],
+  ["news-by-cat-v4"],
   { revalidate: REVALIDATE }
 );
 
@@ -103,13 +94,13 @@ async function fetchLocationNews(query, lang, tag) {
   const { items } = await fetchMany([
     { url: googleNewsSearchUrl(query, searchLang), source: "Google News", lang: searchLang, category: "desh", type: "article" },
   ]);
-  let unique = dedupe(items).map((it) => ({ ...it, ...tag, slug: slugFor(it.title, it.guid || it.link) }));
+  const unique = dedupe(items).map((it) => ({ ...it, ...tag, slug: slugFor(it.title, it.guid || it.link) }));
   try {
     await upsertArticles(unique);
   } catch {
     // storing is best-effort; page still renders from the returned items
   }
-  if (lang === "hinglish") unique = await toHinglish(unique.slice(0, 40));
+  // (No AI on load — city/state titles stay in Hindi even in Hinglish mode; fast.)
   return unique;
 }
 
