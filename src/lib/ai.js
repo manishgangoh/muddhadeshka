@@ -219,3 +219,27 @@ ${keyPoints.map((p) => "- " + p).join("\n")}`;
   const p = parseTransl(text);
   return { title: p.title || title, body: p.body || body, keyPoints: p.keyPoints.length ? p.keyPoints : keyPoints };
 }
+
+// Batch-translate many headlines in one call (for listing pages). Returns same-length array.
+export async function translateTitles(titles, targetLang = "hinglish") {
+  if (!titles.length) return [];
+  const style = STYLE[targetLang] || STYLE.hinglish;
+  const numbered = titles.map((t, i) => `${i + 1}. ${t}`).join("\n");
+  try {
+    const { text } = await aiChat(
+      [
+        { role: "system", content: `Translate each news headline into ${style}. Keep facts/names exact. Output ONLY the numbered list, one headline per line, with the SAME numbers.` },
+        { role: "user", content: numbered },
+      ],
+      { temperature: 0.3, maxTokens: 2000 }
+    );
+    const map = {};
+    for (const line of text.split("\n")) {
+      const m = line.match(/^\s*(\d+)[.):]\s*(.+)$/);
+      if (m) map[+m[1]] = clean(m[2]);
+    }
+    return titles.map((t, i) => map[i + 1] || t);
+  } catch {
+    return titles; // on failure, keep originals
+  }
+}

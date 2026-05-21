@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { normalizeLang, timeAgoHi } from "@/lib/news";
+import { normalizeLang, timeAgoHi, SUPPORTED_LANGS } from "@/lib/news";
 import { getArticleBySlug, saveArticleContent, getRelated, getClusterCandidates, getTranslation, saveTranslation } from "@/lib/db";
 import { rewriteArticle, translateArticle } from "@/lib/ai";
 import { extractFullText } from "@/lib/extract";
@@ -70,11 +70,12 @@ export default async function ArticlePage({ params, searchParams }) {
     }
   }
 
-  const lang = normalizeLang(a.lang);
+  // UI language = ?lang (top-bar / toggle), falls back to the article's native lang
+  const lang = sp?.lang && SUPPORTED_LANGS.includes(sp.lang) ? sp.lang : normalizeLang(a.lang);
   const mergedSources = Array.isArray(a.ai_sources) ? a.ai_sources : [];
 
   // View language toggle (हिंदी / Hinglish / English) — translate on demand + cache
-  const viewLang = VIEW_LANGS.some((v) => v.code === sp?.v) ? sp.v : a.lang;
+  const viewLang = VIEW_LANGS.some((v) => v.code === lang) ? lang : a.lang;
   let dTitle = a.ai_title || a.title;
   let dBody = a.full_content || a.summary || "";
   let dPoints = Array.isArray(a.key_points) ? a.key_points : [];
@@ -136,7 +137,7 @@ export default async function ArticlePage({ params, searchParams }) {
             <span className="flex items-center gap-1">
               <span className="text-xs text-zinc-400">पढ़ें:</span>
               {VIEW_LANGS.map((v) => (
-                <a key={v.code} href={`?v=${v.code}`}
+                <a key={v.code} href={`?lang=${v.code}`}
                    className={`rounded px-2 py-0.5 text-xs font-medium transition ${
                      v.code === viewLang ? "bg-brand-blue text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                    }`}>

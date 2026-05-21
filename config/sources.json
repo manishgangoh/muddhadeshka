@@ -15,6 +15,7 @@
 
   "languages": [
     { "code": "hi", "name": "हिन्दी", "name_en": "Hindi" },
+    { "code": "hinglish", "name": "Hinglish", "name_en": "Hinglish" },
     { "code": "en", "name": "English", "name_en": "English" },
     { "code": "mr", "name": "मराठी", "name_en": "Marathi" },
     { "code": "bn", "name": "বাংলা", "name_en": "Bengali" },

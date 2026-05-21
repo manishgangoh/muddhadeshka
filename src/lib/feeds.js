@@ -14,7 +14,7 @@ export function logoExists() {
   return existsSync(path.join(process.cwd(), "public/logo.png"));
 }
 
-export const SUPPORTED_LANGS = ["hi", "en", "mr", "bn", "ta", "te", "gu", "kn", "ml", "pa"];
+export const SUPPORTED_LANGS = ["hi", "hinglish", "en", "mr", "bn", "ta", "te", "gu", "kn", "ml", "pa"];
 export function normalizeLang(lang) {
   return SUPPORTED_LANGS.includes(lang) ? lang : "hi";
 }

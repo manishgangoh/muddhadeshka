@@ -3,6 +3,14 @@ import { fetchMany, googleNewsSearchUrl } from "./rss.js";
 import { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, feedDefsForLang, dedupe, timeAgoHi } from "./feeds.js";
 import { getArticles, getArticleBySlug, upsertArticles, slugFor } from "./db.js";
 import { findCity, findState } from "./locations.js";
+import { translateTitles } from "./ai.js";
+
+// Replace item titles with Hinglish (batch AI, used for listing pages in Hinglish mode)
+async function toHinglish(items) {
+  if (!items.length) return items;
+  const titles = await translateTitles(items.map((it) => it.title), "hinglish");
+  return items.map((it, i) => ({ ...it, title: titles[i] || it.title }));
+}
 
 // Re-export shared helpers so existing imports from "@/lib/news" keep working
 export { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, dedupe, timeAgoHi, getArticleBySlug };
@@ -35,23 +43,25 @@ async function liveNews(lang) {
 
 const cachedNews = unstable_cache(
   async (lang) => {
-    const rows = await getArticles({ lang, limit: 120 });
-    if (rows.length > 0) return rows.map(dbToItem);
-    return liveNews(lang); // fallback for languages not yet in DB
+    const fetchLang = lang === "hinglish" ? "hi" : lang;
+    const rows = await getArticles({ lang: fetchLang, limit: 120 });
+    let items = rows.length > 0 ? rows.map(dbToItem) : await liveNews(fetchLang);
+    if (lang === "hinglish") items = await toHinglish(items.slice(0, 60));
+    return items;
   },
-  ["news-by-lang-v2"],
+  ["news-by-lang-v3"],
   { revalidate: REVALIDATE }
 );
 
 const cachedCategory = unstable_cache(
   async (category, lang) => {
-    const rows = await getArticles({ lang, category, limit: 60 });
-    if (rows.length > 0) return rows.map(dbToItem);
-    // fallback: filter live items by category
-    const live = await liveNews(lang);
-    return live.filter((it) => it.category === category);
+    const fetchLang = lang === "hinglish" ? "hi" : lang;
+    const rows = await getArticles({ lang: fetchLang, category, limit: 60 });
+    let items = rows.length > 0 ? rows.map(dbToItem) : (await liveNews(fetchLang)).filter((it) => it.category === category);
+    if (lang === "hinglish") items = await toHinglish(items.slice(0, 40));
+    return items;
   },
-  ["news-by-cat-v2"],
+  ["news-by-cat-v3"],
   { revalidate: REVALIDATE }
 );
 
@@ -89,28 +99,32 @@ export async function getHomepageSections(lang = "hi") {
 // --- Hyperlocal: city & state news (via Google News search, stored so /khabar works) ---
 
 async function fetchLocationNews(query, lang, tag) {
+  const searchLang = lang === "hinglish" ? "hi" : lang;
   const { items } = await fetchMany([
-    { url: googleNewsSearchUrl(query, lang), source: "Google News", lang, category: "desh", type: "article" },
+    { url: googleNewsSearchUrl(query, searchLang), source: "Google News", lang: searchLang, category: "desh", type: "article" },
   ]);
-  const unique = dedupe(items).map((it) => ({ ...it, ...tag, slug: slugFor(it.title, it.guid || it.link) }));
+  let unique = dedupe(items).map((it) => ({ ...it, ...tag, slug: slugFor(it.title, it.guid || it.link) }));
   try {
     await upsertArticles(unique);
   } catch {
     // storing is best-effort; page still renders from the returned items
   }
+  if (lang === "hinglish") unique = await toHinglish(unique.slice(0, 40));
   return unique;
 }
 
+// Hindi search term for hi/hinglish, English for en/others
+const locQuery = (name, lang) => `${name} ${lang === "en" ? "news" : "समाचार"}`;
+
 const cachedCityNews = unstable_cache(
-  (slug, name, stateSlug, lang) =>
-    fetchLocationNews(`${name} ${lang === "hi" ? "समाचार" : "news"}`, lang, { city: slug, state: stateSlug }),
-  ["city-news-v1"],
+  (slug, name, stateSlug, lang) => fetchLocationNews(locQuery(name, lang), lang, { city: slug, state: stateSlug }),
+  ["city-news-v2"],
   { revalidate: 900 }
 );
 
 const cachedStateNews = unstable_cache(
-  (slug, nameHi, lang) => fetchLocationNews(`${nameHi} ${lang === "hi" ? "समाचार" : "news"}`, lang, { state: slug }),
-  ["state-news-v1"],
+  (slug, nameHi, lang) => fetchLocationNews(locQuery(nameHi, lang), lang, { state: slug }),
+  ["state-news-v2"],
   { revalidate: 900 }
 );
 
