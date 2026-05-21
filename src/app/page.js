@@ -1,4 +1,5 @@
-import { getHomepageSections, timeAgoHi, normalizeLang } from "@/lib/news";
+import { after } from "next/server";
+import { getHomepageSections, timeAgoHi, normalizeLang, selfRefresh } from "@/lib/news";
 import { getCities } from "@/lib/locations";
 import { CAT, Tag, Card, hrefFor, articleHref, linkProps } from "@/components/ui";
 import SiteHeader from "@/components/SiteHeader";
@@ -7,6 +8,7 @@ import SiteFooter from "@/components/SiteFooter";
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }) {
+  after(selfRefresh); // keep news fresh on visits (background, non-blocking)
   const lang = normalizeLang((await searchParams)?.lang);
   const { lead, sideStories, byCategory } = await getHomepageSections(lang);
   const tickerItems = [lead, ...sideStories].filter(Boolean);

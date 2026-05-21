@@ -1,8 +1,28 @@
 import { unstable_cache } from "next/cache";
 import { fetchMany, googleNewsSearchUrl } from "./rss.js";
 import { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, feedDefsForLang, dedupe, timeAgoHi } from "./feeds.js";
-import { getArticles, getArticleBySlug, upsertArticles, slugFor } from "./db.js";
+import { getArticles, getArticleBySlug, upsertArticles, slugFor, query } from "./db.js";
 import { findCity, findState } from "./locations.js";
+
+// Self-healing refresh: if the newest article is >5 min old, fire a background
+// refresh of the live site (works on traffic, independent of unreliable GitHub cron).
+const _g = globalThis;
+export async function selfRefresh() {
+  try {
+    const now = Date.now();
+    if (_g._mdkLastTrig && now - _g._mdkLastTrig < 5 * 60 * 1000) return; // throttle per instance
+    const rows = await query("select extract(epoch from (now() - max(created_at))) as age from articles");
+    const ageSec = Number(rows[0]?.age ?? 999999);
+    if (ageSec < 300) return; // fresh enough
+    _g._mdkLastTrig = now;
+    const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://muddhadeshka.vercel.app";
+    const secret = process.env.CRON_SECRET || "";
+    // fire-and-trigger the dedicated refresh endpoint (runs independently, 60s budget)
+    await fetch(`${SITE}/api/refresh?secret=${secret}`, { signal: AbortSignal.timeout(4000) }).catch(() => {});
+  } catch {
+    // never let this break a page render
+  }
+}
 
 // Re-export shared helpers so existing imports from "@/lib/news" keep working
 export { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, dedupe, timeAgoHi, getArticleBySlug };
