@@ -101,13 +101,20 @@ const cachedJobs = unstable_cache(
       const liLists = (cfg.linkedinSearches || []).map((kw) => fetchLinkedIn(kw, "India"));
       lists = await Promise.all([...rssLists, ...liLists]);
     }
+    // round-robin interleave so EVERY source (incl. LinkedIn) is represented near the top
     const seen = new Set();
-    const jobs = lists.flat().filter((j) => { if (!j.url || seen.has(j.slug)) return false; seen.add(j.slug); return true; });
-    jobs.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+    const jobs = [];
+    const maxLen = Math.max(0, ...lists.map((l) => l.length));
+    for (let i = 0; i < maxLen; i++) {
+      for (const list of lists) {
+        const j = list[i];
+        if (j && j.url && !seen.has(j.slug)) { seen.add(j.slug); jobs.push(j); }
+      }
+    }
     try { await upsertJobs(jobs); } catch { /* best-effort */ }
     return jobs.slice(0, 60);
   },
-  ["jobs-v3"],
+  ["jobs-v4"],
   { revalidate: 1800 }
 );
 
