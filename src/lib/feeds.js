@@ -15,8 +15,9 @@ export function logoExists() {
 }
 
 export const SUPPORTED_LANGS = ["hi", "hinglish", "en", "mr", "bn", "ta", "te", "gu", "kn", "ml", "pa"];
+export const DEFAULT_LANG = "hinglish"; // site defaults to Hinglish
 export function normalizeLang(lang) {
-  return SUPPORTED_LANGS.includes(lang) ? lang : "hi";
+  return SUPPORTED_LANGS.includes(lang) ? lang : DEFAULT_LANG;
 }
 
 // All feed definitions for a given language (publisher feeds, else Google News topics)
