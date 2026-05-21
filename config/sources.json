@@ -70,7 +70,12 @@
 
     { "source": "Indian Express",  "lang": "en", "category": "rajniti",    "url": "https://indianexpress.com/section/india/feed/" },
     { "source": "Indian Express",  "lang": "en", "category": "khel",       "url": "https://indianexpress.com/section/sports/feed/" },
-    { "source": "Indian Express",  "lang": "en", "category": "manoranjan", "url": "https://indianexpress.com/section/entertainment/feed/" }
+    { "source": "Indian Express",  "lang": "en", "category": "manoranjan", "url": "https://indianexpress.com/section/entertainment/feed/" },
+    { "source": "Times of India",  "lang": "en", "category": "desh", "general": true, "url": "https://timesofindia.indiatimes.com/rssfeedstopstories.cms" },
+    { "source": "NDTV",            "lang": "en", "category": "desh", "general": true, "url": "https://feeds.feedburner.com/ndtvnews-top-stories" },
+    { "source": "The Hindu",       "lang": "en", "category": "desh", "general": true, "url": "https://www.thehindu.com/news/feeder/default.rss" },
+    { "source": "Economic Times",  "lang": "en", "category": "business", "url": "https://economictimes.indiatimes.com/rssfeedsdefault.cms" },
+    { "source": "Livemint",        "lang": "en", "category": "business", "general": true, "url": "https://www.livemint.com/rss/politics" }
   ],
 
   "youtubeChannels": [
