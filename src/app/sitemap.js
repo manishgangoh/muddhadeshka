@@ -1,5 +1,6 @@
 import { query } from "@/lib/db";
 import { getConfig } from "@/lib/news";
+import { getStates, getCities } from "@/lib/locations";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://muddhadeshka.vercel.app";
 
@@ -15,6 +16,9 @@ export default async function sitemap() {
     changeFrequency: "hourly",
     priority: 0.8,
   }));
+
+  const states = getStates().map((s) => ({ url: `${SITE}/state/${s.slug}`, changeFrequency: "hourly", priority: 0.7 }));
+  const cities = getCities().map((c) => ({ url: `${SITE}/city/${c.slug}`, changeFrequency: "hourly", priority: 0.7 }));
 
   let articles = [];
   try {
@@ -35,6 +39,8 @@ export default async function sitemap() {
   return [
     { url: SITE, changeFrequency: "hourly", priority: 1 },
     ...categories,
+    ...states,
+    ...cities,
     ...articles,
   ];
 }

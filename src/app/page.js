@@ -1,4 +1,5 @@
 import { getHomepageSections, timeAgoHi, normalizeLang } from "@/lib/news";
+import { getCities } from "@/lib/locations";
 import { CAT, Tag, Card, hrefFor, articleHref, linkProps } from "@/components/ui";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -9,6 +10,7 @@ export default async function Home({ searchParams }) {
   const lang = normalizeLang((await searchParams)?.lang);
   const { lead, sideStories, byCategory } = await getHomepageSections(lang);
   const tickerItems = [lead, ...sideStories].filter(Boolean);
+  const topCities = getCities().slice(0, 14);
 
   return (
     <div className="min-h-full bg-zinc-100 text-zinc-900">
@@ -69,6 +71,21 @@ export default async function Home({ searchParams }) {
           </div>
         </section>
 
+        {/* City strip */}
+        <section className="mb-10 rounded-xl bg-white p-4 shadow-sm ring-1 ring-zinc-200">
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-extrabold text-zinc-900">
+            <span className="text-xl">📍</span> अपने शहर की खबर
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {topCities.map((c) => (
+              <a key={c.slug} href={hrefFor(`/city/${c.slug}`, lang)}
+                 className="rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-brand-blue hover:text-white">
+                {c.name}
+              </a>
+            ))}
+          </div>
+        </section>
+
         {/* Category sections */}
         {byCategory.map((sec) => (
           <section key={sec.slug} className="mb-10">
@@ -84,7 +101,7 @@ export default async function Home({ searchParams }) {
         ))}
       </main>
 
-      <SiteFooter />
+      <SiteFooter lang={lang} />
     </div>
   );
 }

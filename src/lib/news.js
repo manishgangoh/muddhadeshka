@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
-import { fetchMany } from "./rss.js";
+import { fetchMany, googleNewsSearchUrl } from "./rss.js";
 import { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, feedDefsForLang, dedupe, timeAgoHi } from "./feeds.js";
-import { getArticles, getArticleBySlug } from "./db.js";
+import { getArticles, getArticleBySlug, upsertArticles, slugFor } from "./db.js";
+import { findCity, findState } from "./locations.js";
 
 // Re-export shared helpers so existing imports from "@/lib/news" keep working
 export { getConfig, logoExists, SUPPORTED_LANGS, normalizeLang, dedupe, timeAgoHi, getArticleBySlug };
@@ -83,4 +84,46 @@ export async function getHomepageSections(lang = "hi") {
     .filter((s) => s.items.length > 0);
 
   return { lead, sideStories, byCategory, total: unique.length };
+}
+
+// --- Hyperlocal: city & state news (via Google News search, stored so /khabar works) ---
+
+async function fetchLocationNews(query, lang, tag) {
+  const { items } = await fetchMany([
+    { url: googleNewsSearchUrl(query, lang), source: "Google News", lang, category: "desh", type: "article" },
+  ]);
+  const unique = dedupe(items).map((it) => ({ ...it, ...tag, slug: slugFor(it.title, it.guid || it.link) }));
+  try {
+    await upsertArticles(unique);
+  } catch {
+    // storing is best-effort; page still renders from the returned items
+  }
+  return unique;
+}
+
+const cachedCityNews = unstable_cache(
+  (slug, name, stateSlug, lang) =>
+    fetchLocationNews(`${name} ${lang === "hi" ? "समाचार" : "news"}`, lang, { city: slug, state: stateSlug }),
+  ["city-news-v1"],
+  { revalidate: 900 }
+);
+
+const cachedStateNews = unstable_cache(
+  (slug, nameHi, lang) => fetchLocationNews(`${nameHi} ${lang === "hi" ? "समाचार" : "news"}`, lang, { state: slug }),
+  ["state-news-v1"],
+  { revalidate: 900 }
+);
+
+export async function getCityNews(slug, lang = "hi") {
+  const city = findCity(slug);
+  if (!city) return null;
+  const items = await cachedCityNews(slug, city.name, city.stateSlug, normalizeLang(lang));
+  return { city, items: items || [] };
+}
+
+export async function getStateNews(slug, lang = "hi") {
+  const state = findState(slug);
+  if (!state) return null;
+  const items = await cachedStateNews(slug, state.name_hi, normalizeLang(lang));
+  return { state, items: items || [] };
 }

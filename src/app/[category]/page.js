@@ -42,7 +42,7 @@ export default async function CategoryPage({ params, searchParams }) {
         )}
       </main>
 
-      <SiteFooter />
+      <SiteFooter lang={lang} />
     </div>
   );
 }

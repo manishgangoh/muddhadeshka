@@ -47,16 +47,17 @@ function toDate(v) {
 // Bulk insert RSS items; skip ones already stored (by guid). Returns count inserted.
 export async function upsertArticles(items) {
   if (!items.length) return 0;
-  const cols = ["guid", "source_url", "slug", "title", "summary", "image", "source_name", "category", "lang", "type", "published_at"];
+  const cols = ["guid", "source_url", "slug", "title", "summary", "image", "source_name", "category", "lang", "type", "published_at", "city", "state"];
   const values = [];
   const rows = [];
   let i = 1;
   for (const it of items) {
     const guid = it.guid || it.link;
     if (!guid || !it.title || !it.link) continue;
-    rows.push(`($${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++},$${i++})`);
+    rows.push(`(${Array.from({ length: cols.length }, () => `$${i++}`).join(",")})`);
     values.push(guid, it.link, slugFor(it.title, guid), it.title, it.summary || null, it.image || null,
-      it.source || null, it.category || null, it.lang || "hi", it.type || "article", toDate(it.publishedAt));
+      it.source || null, it.category || null, it.lang || "hi", it.type || "article", toDate(it.publishedAt),
+      it.city || null, it.state || null);
   }
   if (!rows.length) return 0;
   const res = await pool.query(

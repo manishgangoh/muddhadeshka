@@ -169,7 +169,7 @@ export default async function ArticlePage({ params }) {
         )}
       </main>
 
-      <SiteFooter />
+      <SiteFooter lang={lang} />
     </div>
   );
 }
