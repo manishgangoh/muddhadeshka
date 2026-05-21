@@ -44,9 +44,14 @@ export default function SiteHeader({ lang = "hi", basePath = "/", activeCat = "h
             )}
             <span className="hidden text-xs tracking-wide text-zinc-500 sm:block">हर खबर · हर राज्य · हर भाषा</span>
           </a>
-          <span className="hidden items-center gap-1.5 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold text-brand-red sm:flex">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-brand-red" /> लाइव अपडेट
-          </span>
+          <div className="flex items-center gap-2">
+            <a href="/jobs" className="flex items-center gap-1.5 rounded-lg bg-brand-blue px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-brand-blue-dark">
+              <span>💼</span> Jobs
+            </a>
+            <span className="hidden items-center gap-1.5 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold text-brand-red md:flex">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand-red" /> लाइव
+            </span>
+          </div>
         </div>
       </header>
 

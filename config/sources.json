@@ -83,6 +83,23 @@
 
   "youtubeRssTemplate": "https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}",
 
+  "jobCategories": [
+    { "slug": "all", "name_hi": "सभी जॉब्स" },
+    { "slug": "dev", "name_hi": "डेवलपर" },
+    { "slug": "design", "name_hi": "डिज़ाइन" },
+    { "slug": "marketing", "name_hi": "मार्केटिंग" },
+    { "slug": "data", "name_hi": "डेटा / AI" }
+  ],
+  "jobFeeds": [
+    { "source": "RemoteOK",       "category": "all",       "url": "https://remoteok.com/remote-jobs.rss" },
+    { "source": "WeWorkRemotely", "category": "all",       "url": "https://weworkremotely.com/remote-jobs.rss" },
+    { "source": "Himalayas",      "category": "all",       "url": "https://himalayas.app/jobs/rss" },
+    { "source": "Jobicy",         "category": "dev",       "url": "https://jobicy.com/?feed=job_feed&job_categories=dev" },
+    { "source": "Jobicy",         "category": "design",    "url": "https://jobicy.com/?feed=job_feed&job_categories=design-multimedia" },
+    { "source": "Jobicy",         "category": "marketing", "url": "https://jobicy.com/?feed=job_feed&job_categories=marketing" },
+    { "source": "Jobicy",         "category": "data",      "url": "https://jobicy.com/?feed=job_feed&job_categories=data-science" }
+  ],
+
   "states": [
     { "code": "up", "name_hi": "उत्तर प्रदेश", "name_en": "Uttar Pradesh", "cities": ["Lucknow", "Kanpur", "Varanasi", "Prayagraj", "Noida", "Ghaziabad", "Agra", "Meerut"] },
     { "code": "mh", "name_hi": "महाराष्ट्र",   "name_en": "Maharashtra",   "cities": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad"] },
