@@ -75,7 +75,9 @@
     { "source": "NDTV",            "lang": "en", "category": "desh", "general": true, "url": "https://feeds.feedburner.com/ndtvnews-top-stories" },
     { "source": "The Hindu",       "lang": "en", "category": "desh", "general": true, "url": "https://www.thehindu.com/news/feeder/default.rss" },
     { "source": "Economic Times",  "lang": "en", "category": "business", "url": "https://economictimes.indiatimes.com/rssfeedsdefault.cms" },
-    { "source": "Livemint",        "lang": "en", "category": "business", "general": true, "url": "https://www.livemint.com/rss/politics" }
+    { "source": "Livemint",        "lang": "en", "category": "business", "general": true, "url": "https://www.livemint.com/rss/politics" },
+    { "source": "Gadgets 360",     "lang": "en", "category": "tech", "url": "https://feeds.feedburner.com/gadgets360-latest" },
+    { "source": "Digit",           "lang": "hi", "category": "tech", "url": "https://www.digit.in/feed/" }
   ],
 
   "youtubeChannels": [
