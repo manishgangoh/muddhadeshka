@@ -49,6 +49,31 @@ async function fetchUrl(url, source, jobType) {
   }
 }
 
+// LinkedIn has no public RSS — use its guest job-search endpoint (unofficial) and parse cards
+async function fetchLinkedIn(keywords, location = "India") {
+  try {
+    const url = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(keywords)}&location=${encodeURIComponent(location)}&start=0`;
+    const res = await fetch(url, {
+      headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return html.split("<li>").slice(1).map((c) => {
+      const title = clean((c.match(/base-search-card__title[^>]*>([^<]+)/) || [])[1]);
+      const company = clean((c.match(/hidden-nested-link[^>]*>([^<]+)/) || [])[1]);
+      const loc = clean((c.match(/job-search-card__location[^>]*>([^<]+)/) || [])[1]);
+      const link = (c.match(/href="(https:\/\/[a-z]+\.linkedin\.com\/jobs\/view\/[^"?]+)/) || [])[1];
+      const img = (c.match(/data-delayed-url="([^"]+)"/) || [])[1];
+      const dt = (c.match(/datetime="([^"]+)"/) || [])[1];
+      if (!title || !link) return null;
+      return { guid: link, slug: slugFor(title + company, link), title, company, location: loc || "India", url: link, source: "LinkedIn", image: img || null, description: "", job_type: "private", publishedAt: dt || null };
+    }).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 async function upsertJobs(jobs) {
   const valid = jobs.filter((j) => j.guid && j.title && j.url);
   if (!valid.length) return;
@@ -72,7 +97,9 @@ const cachedJobs = unstable_cache(
         (cfg.govtJobQueries || []).map((q) => fetchUrl(googleNewsSearchUrl(q, "hi"), "Sarkari Naukri", "government"))
       );
     } else {
-      lists = await Promise.all(cfg.jobFeeds.filter((f) => f.type === "private").map((f) => fetchUrl(f.url, f.source, "private")));
+      const rssLists = cfg.jobFeeds.filter((f) => f.type === "private").map((f) => fetchUrl(f.url, f.source, "private"));
+      const liLists = (cfg.linkedinSearches || []).map((kw) => fetchLinkedIn(kw, "India"));
+      lists = await Promise.all([...rssLists, ...liLists]);
     }
     const seen = new Set();
     const jobs = lists.flat().filter((j) => { if (!j.url || seen.has(j.slug)) return false; seen.add(j.slug); return true; });
@@ -80,7 +107,7 @@ const cachedJobs = unstable_cache(
     try { await upsertJobs(jobs); } catch { /* best-effort */ }
     return jobs.slice(0, 60);
   },
-  ["jobs-v2"],
+  ["jobs-v3"],
   { revalidate: 1800 }
 );
 

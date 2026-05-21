@@ -102,6 +102,7 @@
     { "source": "Jobicy",         "type": "private", "url": "https://jobicy.com/?feed=job_feed" }
   ],
   "govtJobQueries": ["सरकारी नौकरी भर्ती 2026", "government job vacancy India sarkari naukri"],
+  "linkedinSearches": ["software developer", "marketing", "graphic designer", "data analyst", "sales", "human resources"],
 
   "states": [
     { "code": "up", "name_hi": "उत्तर प्रदेश", "name_en": "Uttar Pradesh", "cities": ["Lucknow", "Kanpur", "Varanasi", "Prayagraj", "Noida", "Ghaziabad", "Agra", "Meerut"] },
