@@ -45,8 +45,11 @@ export default function SiteHeader({ lang = "hi", basePath = "/", activeCat = "h
             <span className="hidden text-xs tracking-wide text-zinc-500 sm:block">हर खबर · हर राज्य · हर भाषा</span>
           </a>
           <div className="flex items-center gap-2">
-            <a href="/jobs" className="flex items-center gap-1.5 rounded-lg bg-brand-blue px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-brand-blue-dark">
-              <span>💼</span> Jobs
+            <a href="/jobs" className="flex items-center gap-1.5 rounded-lg bg-brand-red px-3.5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-brand-red-dark">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-6 0h-4V5h4v2z" />
+              </svg>
+              Jobs
             </a>
             <span className="hidden items-center gap-1.5 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold text-brand-red md:flex">
               <span className="h-2 w-2 animate-pulse rounded-full bg-brand-red" /> लाइव
