@@ -20,6 +20,7 @@ export const metadata = {
   },
   description: "देश-दुनिया, राजनीति, खेल, मनोरंजन, बिज़नेस की ताज़ा खबरें — हर राज्य, हर शहर, हर भाषा में। मुद्दा देश का पर पढ़ें पूरी खबर।",
   keywords: ["हिंदी समाचार", "ताज़ा खबर", "Hindi news", "breaking news", "राजनीति", "खेल", "मनोरंजन", "muddhadeshka"],
+  verification: { google: "NXRNio0d5iOoszoQPB5BY06EPvQjQIrzLntDlzHb6NY" },
   openGraph: {
     type: "website", siteName: "मुद्दा देश का", locale: "hi_IN",
     title: "मुद्दा देश का — ताज़ा हिंदी समाचार",
