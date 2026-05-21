@@ -61,13 +61,19 @@ export default async function JobsPage({ searchParams }) {
         <div className="mx-auto max-w-5xl">
           <h1 className="text-2xl font-extrabold sm:text-3xl">अपनी अगली नौकरी खोजें 💼</h1>
           <p className="mt-1 text-sm text-blue-100">प्राइवेट · सरकारी · रिमोट · LinkedIn — सब एक जगह</p>
-          <form action="/jobs" method="get" className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <form action="/jobs" method="get" className="mt-4 flex flex-col gap-2 rounded-xl bg-white p-2 shadow-lg sm:flex-row sm:items-center">
             <input type="hidden" name="type" value={jobType} />
-            <input name="q" defaultValue={q} placeholder="जॉब टाइटल या कंपनी (e.g. developer)"
-                   className="flex-1 rounded-lg px-4 py-2.5 text-sm text-zinc-900 outline-none" />
-            <input name="loc" defaultValue={loc} placeholder="शहर / location (e.g. Mumbai)"
-                   className="rounded-lg px-4 py-2.5 text-sm text-zinc-900 outline-none sm:w-56" />
-            <button className="rounded-lg bg-brand-red px-6 py-2.5 text-sm font-bold text-white hover:bg-brand-red-dark">खोजें</button>
+            <div className="flex flex-1 items-center gap-2 px-2">
+              <span className="text-zinc-400">🔍</span>
+              <input name="q" defaultValue={q} placeholder="जॉब टाइटल या कंपनी (e.g. developer)"
+                     className="w-full bg-white py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none" />
+            </div>
+            <div className="flex items-center gap-2 border-zinc-200 px-2 sm:border-l sm:w-56">
+              <span className="text-zinc-400">📍</span>
+              <input name="loc" defaultValue={loc} placeholder="शहर / location"
+                     className="w-full bg-white py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none" />
+            </div>
+            <button className="rounded-lg bg-brand-red px-6 py-2.5 text-sm font-bold text-white transition hover:bg-brand-red-dark">खोजें</button>
           </form>
         </div>
       </section>
