@@ -129,11 +129,12 @@ export async function getJobBySlug(slug) {
   return rows[0] || null;
 }
 
-// Search across ALL stored jobs by keyword (title/company) and/or location
-export async function searchJobs({ q, loc, jobType, limit = 60 }) {
+// Search across ALL stored jobs by keyword, location and/or source platform
+export async function searchJobs({ q, loc, jobType, source, limit = 60 }) {
   const conds = [], vals = [];
   let i = 1;
   if (jobType) { conds.push(`job_type = $${i++}`); vals.push(jobType); }
+  if (source) { conds.push(`source = $${i++}`); vals.push(source); }
   if (q) { conds.push(`(title ilike $${i} or company ilike $${i})`); vals.push(`%${q}%`); i++; }
   if (loc) { conds.push(`location ilike $${i++}`); vals.push(`%${loc}%`); }
   const where = conds.length ? `where ${conds.join(" and ")}` : "";
@@ -142,6 +143,12 @@ export async function searchJobs({ q, loc, jobType, limit = 60 }) {
     [...vals, limit]
   );
   return rows;
+}
+
+// Private job platforms (for the source filter)
+export function jobSources() {
+  const rss = [...new Set(getConfig().jobFeeds.filter((f) => f.type === "private").map((f) => f.source))];
+  return ["LinkedIn", ...rss];
 }
 
 export function jobTypes() {

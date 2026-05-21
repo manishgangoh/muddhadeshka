@@ -1,4 +1,4 @@
-import { getJobs, searchJobs, jobTypes, jobTimeAgo } from "@/lib/jobs";
+import { getJobs, searchJobs, jobTypes, jobSources, jobTimeAgo } from "@/lib/jobs";
 import { normalizeLang } from "@/lib/news";
 import Avatar from "@/components/Avatar";
 import SiteHeader from "@/components/SiteHeader";
@@ -42,14 +42,20 @@ export default async function JobsPage({ searchParams }) {
   const type = sp?.type || "private";
   const q = (sp?.q || "").trim();
   const loc = (sp?.loc || "").trim();
+  const src = (sp?.src || "").trim();
   const types = jobTypes();
+  const sources = jobSources();
 
   let jobs, jobType = type;
-  if (q || loc) {
-    jobs = await searchJobs({ q, loc, jobType: type, limit: 60 });
+  if (q || loc || src) {
+    jobs = await searchJobs({ q, loc, source: src || undefined, jobType: type, limit: 60 });
   } else {
     ({ jobType, jobs } = await getJobs(type));
   }
+  const qs = (extra) => {
+    const o = { type: jobType, ...(q ? { q } : {}), ...(loc ? { loc } : {}), ...(src ? { src } : {}), ...extra };
+    return "/jobs?" + Object.entries(o).filter(([, v]) => v).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+  };
 
   return (
     <div className="min-h-full bg-zinc-100 text-zinc-900">
@@ -79,7 +85,7 @@ export default async function JobsPage({ searchParams }) {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {/* Type tabs */}
-        <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           {types.map((t) => (
             <a key={t.slug} href={`/jobs?type=${t.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}${loc ? `&loc=${encodeURIComponent(loc)}` : ""}`}
                className={`rounded-lg px-4 py-2 text-sm font-bold transition ${
@@ -88,12 +94,29 @@ export default async function JobsPage({ searchParams }) {
               {t.name_hi}
             </a>
           ))}
-          {(q || loc) && (
-            <a href={`/jobs?type=${jobType}`} className="ml-auto text-sm font-medium text-brand-blue hover:underline">✕ सर्च हटाएं</a>
+          {(q || loc || src) && (
+            <a href={`/jobs?type=${jobType}`} className="ml-auto text-sm font-medium text-brand-blue hover:underline">✕ फ़िल्टर हटाएं</a>
           )}
         </div>
 
-        {(q || loc) && <p className="mb-4 text-sm text-zinc-500">"{q || loc}" के लिए {jobs.length} नतीजे</p>}
+        {/* Source / platform filter (private only) */}
+        {jobType === "private" && (
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-zinc-400">प्लेटफ़ॉर्म:</span>
+            <a href={qs({ src: "" })}
+               className={`rounded-full px-3 py-1 text-xs font-semibold transition ${!src ? "bg-brand-blue text-white" : "bg-white text-zinc-600 ring-1 ring-zinc-200 hover:bg-zinc-100"}`}>
+              सभी
+            </a>
+            {sources.map((s) => (
+              <a key={s} href={qs({ src: s })}
+                 className={`rounded-full px-3 py-1 text-xs font-semibold transition ${src === s ? "bg-brand-blue text-white" : "bg-white text-zinc-600 ring-1 ring-zinc-200 hover:bg-zinc-100"}`}>
+                {s}
+              </a>
+            ))}
+          </div>
+        )}
+
+        {(q || loc || src) && <p className="mb-4 text-sm text-zinc-500">{src || q || loc} — {jobs.length} jobs</p>}
 
         {jobs.length === 0 ? (
           <p className="py-16 text-center text-zinc-500">कोई जॉब नहीं मिली। दूसरा कीवर्ड या शहर आज़माएँ।</p>
