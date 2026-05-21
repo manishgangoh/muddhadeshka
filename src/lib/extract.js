@@ -62,6 +62,31 @@ async function viaJsonLd(url) {
   }
 }
 
+// Fetch the og:image (or twitter:image) of a source article. Skips generic site
+// logos/defaults. Returns null for Google News links (encoded redirects, no image).
+export async function fetchOgImage(url) {
+  if (/news\.google\.com/.test(url)) return null;
+  try {
+    const res = await fetch(url, {
+      headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) return null;
+    const html = (await res.text()).slice(0, 250000);
+    const m =
+      html.match(/<meta[^>]+property=["']og:image(?::url)?["'][^>]+content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image/i) ||
+      html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+    const img = m?.[1];
+    if (!img || !/^https?:\/\//.test(img)) return null;
+    if (/og-image|default|placeholder|logo|sprite|favicon|blank/i.test(img)) return null; // generic
+    return img;
+  } catch {
+    return null;
+  }
+}
+
 // Fetch a source article's main body as plain text. Returns null if nothing usable
 // (paywall/bot-block) so callers can fall back to the RSS summary.
 export async function extractFullText(url) {

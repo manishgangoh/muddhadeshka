@@ -1,8 +1,21 @@
 import { getConfig, feedDefsForLang, dedupe } from "./feeds.js";
 import { fetchFeed } from "./rss.js";
-import { upsertArticles, getArticlesNeedingHinglish, saveHinglishTitles } from "./db.js";
+import { upsertArticles, getArticlesNeedingHinglish, saveHinglishTitles, getArticlesNeedingImage, saveImages } from "./db.js";
 import { categorize } from "./categorize.js";
 import { translateTitles } from "./ai.js";
+import { fetchOgImage } from "./extract.js";
+
+// Pre-fetch og:image for image-less articles (real URLs only) in the background
+export async function backfillImages(limit = 12) {
+  const rows = await getArticlesNeedingImage(limit);
+  const pairs = [];
+  for (const r of rows) {
+    const img = await fetchOgImage(r.source_url);
+    if (img) pairs.push({ id: r.id, image: img });
+  }
+  await saveImages(pairs);
+  return pairs.length;
+}
 
 // Pre-generate Hinglish titles in the background so listing pages never run AI on load
 export async function backfillHinglishTitles(limit = 60) {
@@ -42,7 +55,8 @@ export async function refreshLang(lang) {
 export async function refreshAllNews(langs = ["hi", "en"]) {
   const results = [];
   for (const l of langs) results.push(await refreshLang(l));
-  // background: pre-generate Hinglish titles for any new/untranslated articles
+  // background: pre-generate Hinglish titles + fetch missing images
   try { await backfillHinglishTitles(60); } catch { /* best-effort */ }
+  try { await backfillImages(10); } catch { /* best-effort */ }
   return results;
 }

@@ -146,6 +146,27 @@ export async function saveHinglishTitles(pairs) {
   );
 }
 
+// Image-less articles that have a REAL source URL (skip Google News encoded links)
+export async function getArticlesNeedingImage(limit = 12) {
+  return query(
+    `select id, source_url from articles
+     where image is null and source_url not like '%news.google.com%'
+     order by published_at desc nulls last limit $1`,
+    [limit]
+  );
+}
+
+export async function saveImages(pairs) {
+  if (!pairs.length) return;
+  const ph = [], vals = [];
+  let i = 1;
+  for (const p of pairs) { ph.push(`($${i++}::bigint, $${i++}::text)`); vals.push(p.id, p.image); }
+  await pool.query(
+    `update articles a set image = v.img from (values ${ph.join(",")}) as v(id, img) where a.id = v.id`,
+    vals
+  );
+}
+
 export async function countArticles() {
   const rows = await query(`select count(*)::int as n from articles`);
   return rows[0]?.n || 0;

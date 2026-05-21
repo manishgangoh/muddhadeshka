@@ -42,7 +42,10 @@ export function Card({ it, lang = "hi" }) {
       <div className="aspect-video overflow-hidden bg-zinc-100">
         {it.image
           ? <img src={it.image} alt="" loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-          : <div className="flex h-full items-center justify-center text-sm font-semibold text-zinc-300">मुद्दा देश का</div>}
+          : <div className={`flex h-full flex-col items-center justify-center gap-1 ${CAT[it.category]?.color || "bg-brand-blue"} text-white`}>
+              <span className="text-base font-extrabold">{CAT[it.category]?.label || "मुद्दा देश का"}</span>
+              <span className="text-[10px] font-medium opacity-75">मुद्दा देश का</span>
+            </div>}
       </div>
       <div className="flex flex-1 flex-col p-3.5">
         <Tag slug={it.category} />
