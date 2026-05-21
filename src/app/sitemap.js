@@ -3,7 +3,9 @@ import { getConfig } from "@/lib/news";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://muddhadeshka.vercel.app";
 
-export const dynamic = "force-dynamic";
+// Cache the sitemap and rebuild it hourly so Googlebot gets a fast response
+// (a fresh 5000-row DB query on every fetch was too slow → "could not be read").
+export const revalidate = 3600;
 
 export default async function sitemap() {
   const cfg = getConfig();
