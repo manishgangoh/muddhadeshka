@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { normalizeLang, timeAgoHi } from "@/lib/news";
-import { getArticleBySlug, saveArticleContent, getRelated, getClusterCandidates } from "@/lib/db";
-import { rewriteArticle } from "@/lib/ai";
+import { getArticleBySlug, saveArticleContent, getRelated, getClusterCandidates, getTranslation, saveTranslation } from "@/lib/db";
+import { rewriteArticle, translateArticle } from "@/lib/ai";
 import { extractFullText } from "@/lib/extract";
 import { findSameStory } from "@/lib/cluster";
 import { CAT, Tag, hrefFor } from "@/components/ui";
@@ -35,8 +35,15 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function ArticlePage({ params }) {
+const VIEW_LANGS = [
+  { code: "hi", label: "हिंदी" },
+  { code: "hinglish", label: "Hinglish" },
+  { code: "en", label: "English" },
+];
+
+export default async function ArticlePage({ params, searchParams }) {
   const { slug } = await params;
+  const sp = await searchParams;
   let a = await getArticleBySlug(slug);
   if (!a) notFound();
 
@@ -65,8 +72,26 @@ export default async function ArticlePage({ params }) {
 
   const lang = normalizeLang(a.lang);
   const mergedSources = Array.isArray(a.ai_sources) ? a.ai_sources : [];
-  const points = Array.isArray(a.key_points) ? a.key_points : [];
-  const paragraphs = (a.full_content || a.summary || "").split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+
+  // View language toggle (हिंदी / Hinglish / English) — translate on demand + cache
+  const viewLang = VIEW_LANGS.some((v) => v.code === sp?.v) ? sp.v : a.lang;
+  let dTitle = a.ai_title || a.title;
+  let dBody = a.full_content || a.summary || "";
+  let dPoints = Array.isArray(a.key_points) ? a.key_points : [];
+  if (viewLang !== a.lang && a.full_content) {
+    let t = await getTranslation(slug, viewLang);
+    if (!t) {
+      try {
+        const r = await translateArticle({ title: dTitle, body: dBody, keyPoints: dPoints, targetLang: viewLang });
+        await saveTranslation(slug, viewLang, r);
+        t = { title: r.title, body: r.body, key_points: r.keyPoints };
+      } catch { /* translation failed → show native */ }
+    }
+    if (t) { dTitle = t.title || dTitle; dBody = t.body || dBody; dPoints = Array.isArray(t.key_points) ? t.key_points : dPoints; }
+  }
+
+  const points = dPoints;
+  const paragraphs = dBody.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   const related = await getRelated({ lang, category: a.category, excludeSlug: slug, limit: 6 });
   const catLabel = CAT[a.category]?.label || "";
 
@@ -104,10 +129,21 @@ export default async function ArticlePage({ params }) {
         <article className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 sm:p-7">
           <Tag slug={a.category} />
           <h1 className="mt-2 text-2xl font-extrabold leading-tight text-zinc-900 sm:text-3xl">
-            {a.ai_title || a.title}
+            {dTitle}
           </h1>
-          <div className="mt-2 text-sm text-zinc-500">
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
             <span>{timeAgoHi(a.published_at)}</span>
+            <span className="flex items-center gap-1">
+              <span className="text-xs text-zinc-400">पढ़ें:</span>
+              {VIEW_LANGS.map((v) => (
+                <a key={v.code} href={`?v=${v.code}`}
+                   className={`rounded px-2 py-0.5 text-xs font-medium transition ${
+                     v.code === viewLang ? "bg-brand-blue text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                   }`}>
+                  {v.label}
+                </a>
+              ))}
+            </span>
           </div>
 
           {a.image && (

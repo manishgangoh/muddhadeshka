@@ -114,6 +114,19 @@ export async function getClusterCandidates({ lang, category, excludeSlug, sinceH
   );
 }
 
+export async function getTranslation(slug, lang) {
+  const rows = await query(`select title, body, key_points from article_translations where slug=$1 and lang=$2 limit 1`, [slug, lang]);
+  return rows[0] || null;
+}
+
+export async function saveTranslation(slug, lang, { title, body, keyPoints }) {
+  await pool.query(
+    `insert into article_translations (slug, lang, title, body, key_points) values ($1,$2,$3,$4,$5)
+     on conflict (slug, lang) do update set title=$3, body=$4, key_points=$5`,
+    [slug, lang, title || null, body || null, JSON.stringify(keyPoints || [])]
+  );
+}
+
 export async function countArticles() {
   const rows = await query(`select count(*)::int as n from articles`);
   return rows[0]?.n || 0;

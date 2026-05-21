@@ -178,3 +178,44 @@ ${lengthHint} in ${langName}, in 4-7 well-structured paragraphs
     mergedSources: usable.map((s) => s.name),
   };
 }
+
+// Parse a simple TITLE/BODY/POINTS response (for translations)
+function parseTransl(text) {
+  const grab = (s, e) => {
+    const i = text.indexOf(s);
+    if (i === -1) return "";
+    const from = i + s.length;
+    const j = e ? text.indexOf(e, from) : -1;
+    return text.slice(from, j === -1 ? undefined : j).trim();
+  };
+  return {
+    title: clean(grab("###TITLE###", "###BODY###")),
+    body: clean(grab("###BODY###", "###POINTS###")),
+    keyPoints: grab("###POINTS###", null).split("\n").map((l) => clean(l.replace(/^[-*•\d.\s]+/, ""))).filter((l) => l && !/^<\/?[a-z_]+>$/i.test(l)),
+  };
+}
+
+const STYLE = {
+  hinglish: "Hinglish — Hindi written in Roman (English) letters, natural conversational Indian style. Keep important English/technical/proper words in English. Example tone: \"Government ne nayi AI policy launch ki hai, jisse startups ko fayda hoga.\"",
+  en: "natural, fluent English",
+  hi: "natural Hindi in Devanagari script",
+};
+
+// Translate an already-written article into another language/style (keeps facts identical)
+export async function translateArticle({ title, body, keyPoints = [], targetLang }) {
+  const style = STYLE[targetLang] || STYLE.hinglish;
+  const system = `You are a translator/localiser for an Indian news website. Rewrite the given article into ${style}. Keep ALL facts, names and numbers exactly the same — only change the language/style. Do not add or remove information.`;
+  const user = `Translate this into ${style}. Keep the EXACT format with ### markers (no angle brackets):
+###TITLE###
+${title}
+###BODY###
+${body}
+###POINTS###
+${keyPoints.map((p) => "- " + p).join("\n")}`;
+  const { text } = await aiChat(
+    [{ role: "system", content: system }, { role: "user", content: user }],
+    { temperature: 0.4, maxTokens: 3000 }
+  );
+  const p = parseTransl(text);
+  return { title: p.title || title, body: p.body || body, keyPoints: p.keyPoints.length ? p.keyPoints : keyPoints };
+}
