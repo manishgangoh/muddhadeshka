@@ -1,14 +1,22 @@
 // AI fallback chain — all providers use the OpenAI-compatible /chat/completions API.
-// Preference order: Groq -> Gemini -> OpenRouter -> Cerebras -> Mistral.
+// Many free tiers chained together for maximum combined throughput.
 // One request hits ONE provider at a time. When a provider hits its rate/quota limit
 // it goes on a temporary cooldown and is skipped, so the next provider takes over —
 // this spreads load across every free tier and maximises combined throughput.
 
+// Each entry is an independent free tier → the more we add, the more combined
+// throughput. A provider is used only if its API key env var is set; otherwise it's
+// skipped, so unconfigured ones cause no harm. `urlEnv` (e.g. Cloudflare's account id)
+// is substituted into {ACCOUNT_ID} in the url and is also required for that provider.
 const PROVIDERS = [
   { name: "groq", env: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", model: "llama-3.3-70b-versatile" },
   { name: "gemini", env: "GEMINI_API_KEY", url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", model: "gemini-2.5-flash-lite" },
-  { name: "openrouter", env: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", model: "meta-llama/llama-3.3-70b-instruct:free" },
+  { name: "sambanova", env: "SAMBANOVA_API_KEY", url: "https://api.sambanova.ai/v1/chat/completions", model: "Meta-Llama-3.3-70B-Instruct" },
   { name: "cerebras", env: "CEREBRAS_API_KEY", url: "https://api.cerebras.ai/v1/chat/completions", model: "llama-3.1-8b" },
+  { name: "nvidia", env: "NVIDIA_API_KEY", url: "https://integrate.api.nvidia.com/v1/chat/completions", model: "meta/llama-3.3-70b-instruct" },
+  { name: "openrouter", env: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions", model: "meta-llama/llama-3.3-70b-instruct:free" },
+  { name: "github", env: "GITHUB_MODELS_TOKEN", url: "https://models.github.ai/inference/chat/completions", model: "openai/gpt-4o-mini" },
+  { name: "cloudflare", env: "CLOUDFLARE_API_KEY", urlEnv: "CF_ACCOUNT_ID", url: "https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1/chat/completions", model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast" },
   { name: "mistral", env: "MISTRAL_API_KEY", url: "https://api.mistral.ai/v1/chat/completions", model: "mistral-small-latest" },
 ];
 
@@ -16,7 +24,13 @@ const PROVIDERS = [
 const state = (globalThis._mdkAi ||= { cooldownUntil: {} });
 
 function configured() {
-  return PROVIDERS.filter((p) => process.env[p.env]).map((p) => ({ ...p, key: process.env[p.env] }));
+  return PROVIDERS
+    .filter((p) => process.env[p.env] && (!p.urlEnv || process.env[p.urlEnv]))
+    .map((p) => ({
+      ...p,
+      key: process.env[p.env],
+      url: p.urlEnv ? p.url.replace("{ACCOUNT_ID}", process.env[p.urlEnv]) : p.url,
+    }));
 }
 
 // Ready providers (not cooling down) first in preference order; cooled ones kept as last resort
