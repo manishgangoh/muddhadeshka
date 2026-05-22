@@ -167,6 +167,18 @@ export async function saveImages(pairs) {
   );
 }
 
+// Newest articles whose full AI content hasn't been generated yet (recent only —
+// no point pre-generating stale news nobody opens). Used by the pre-warm cron.
+export async function getArticlesNeedingContent({ limit = 8, sinceHours = 48 } = {}) {
+  return query(
+    `select * from articles
+     where full_content is null
+       and published_at > now() - ($1 || ' hours')::interval
+     order by published_at desc nulls last limit $2`,
+    [String(sinceHours), limit]
+  );
+}
+
 export async function countArticles() {
   const rows = await query(`select count(*)::int as n from articles`);
   return rows[0]?.n || 0;

@@ -1,4 +1,4 @@
-import { getArticleBySlug, saveArticleContent, getClusterCandidates } from "./db.js";
+import { getArticleBySlug, saveArticleContent, getClusterCandidates, getArticlesNeedingContent } from "./db.js";
 import { rewriteArticle } from "./ai.js";
 import { extractFullText } from "./extract.js";
 import { findSameStory } from "./cluster.js";
@@ -31,4 +31,19 @@ export async function buildArticleContent(slugOrArticle) {
     ai_title: r.title, full_content: r.body, key_points: r.keyPoints,
     ai_sources: r.mergedSources, meta_title: r.metaTitle, meta_desc: r.metaDesc,
   };
+}
+
+// Background pre-warm: generate full AI articles for the newest un-generated news so
+// that by the time a user opens them, the full story is already ready (and instant).
+// Time-budgeted + newest-first so it always prioritises homepage-visible stories and
+// never exceeds the serverless function's time limit.
+export async function prewarmArticles({ limit = 10, sinceHours = 48, budgetMs = 50000 } = {}) {
+  const rows = await getArticlesNeedingContent({ limit, sinceHours });
+  const start = Date.now();
+  let generated = 0;
+  for (const a of rows) {
+    if (Date.now() - start > budgetMs) break; // leave room before the function is killed
+    try { if (await buildArticleContent(a)) generated++; } catch { /* skip; next run retries */ }
+  }
+  return { candidates: rows.length, generated };
 }
