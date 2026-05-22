@@ -12,9 +12,9 @@ export const CAT = {
   vigyan: { label: "विज्ञान", color: "bg-violet-600" },
 };
 
-// Build a URL preserving the selected language (hi is default → no param)
+// Build a URL preserving the selected language (hinglish is the default → no param)
 export function hrefFor(path, lang) {
-  return lang && lang !== "hi" ? `${path}?lang=${lang}` : path;
+  return lang && lang !== "hinglish" ? `${path}?lang=${lang}` : path;
 }
 
 // Where a news item links: our own article page if it's stored (has slug), else the source
