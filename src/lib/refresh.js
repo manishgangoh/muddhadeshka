@@ -4,6 +4,7 @@ import { upsertArticles, getArticlesNeedingHinglish, saveHinglishTitles, getArti
 import { categorize } from "./categorize.js";
 import { translateTitles } from "./ai.js";
 import { fetchOgImage } from "./extract.js";
+import { refreshViral } from "./viral.js";
 
 // Pre-fetch og:image for image-less articles (real URLs only) in the background
 export async function backfillImages(limit = 12) {
@@ -58,5 +59,7 @@ export async function refreshAllNews(langs = ["hi", "en"]) {
   // background: pre-generate Hinglish titles + fetch missing images
   try { await backfillHinglishTitles(60); } catch { /* best-effort */ }
   try { await backfillImages(10); } catch { /* best-effort */ }
+  // viral/trending: pull Google Trends + summarise a few topics (rest fill on later runs)
+  try { await refreshViral(6); } catch { /* best-effort */ }
   return results;
 }

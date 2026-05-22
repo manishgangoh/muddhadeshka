@@ -19,6 +19,7 @@ export default async function sitemap() {
 
   const pages = [
     { url: `${SITE}/jobs`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${SITE}/viral`, changeFrequency: "hourly", priority: 0.8 },
     ...["about", "contact", "privacy", "terms", "disclaimer"].map((p) => ({ url: `${SITE}/${p}`, changeFrequency: "monthly", priority: 0.3 })),
   ];
 
