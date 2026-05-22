@@ -33,17 +33,24 @@ export async function buildArticleContent(slugOrArticle) {
   };
 }
 
-// Background pre-warm: generate full AI articles for the newest un-generated news so
-// that by the time a user opens them, the full story is already ready (and instant).
-// Time-budgeted + newest-first so it always prioritises homepage-visible stories and
-// never exceeds the serverless function's time limit.
-export async function prewarmArticles({ limit = 10, sinceHours = 48, budgetMs = 50000 } = {}) {
-  const rows = await getArticlesNeedingContent({ limit, sinceHours });
+// Background pre-warm: generate full AI articles ahead of time so users open
+// already-ready, instant stories. PRIORITY tiers (newest-first within each):
+//   1. Brand-new (last 6h)   → the freshest news + homepage lead/side stories
+//   2. Recent   (last 24h)   → rest of the homepage + category pages
+// Older news (>24h) is intentionally skipped here — it is rarely opened and is
+// generated lazily on first click instead, so the agent's whole time budget
+// always goes to what users actually see. Time-budgeted so it never overruns
+// the serverless function limit.
+export async function prewarmArticles({ limit = 10, budgetMs = 50000 } = {}) {
   const start = Date.now();
   let generated = 0;
-  for (const a of rows) {
-    if (Date.now() - start > budgetMs) break; // leave room before the function is killed
-    try { if (await buildArticleContent(a)) generated++; } catch { /* skip; next run retries */ }
+  for (const sinceHours of [6, 24]) {
+    if (Date.now() - start > budgetMs || generated >= limit) break;
+    const rows = await getArticlesNeedingContent({ limit: limit - generated, sinceHours });
+    for (const a of rows) {
+      if (Date.now() - start > budgetMs || generated >= limit) break;
+      try { if (await buildArticleContent(a)) generated++; } catch { /* skip; next run retries */ }
+    }
   }
-  return { candidates: rows.length, generated };
+  return { generated };
 }
