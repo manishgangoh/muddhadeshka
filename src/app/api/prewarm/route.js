@@ -16,7 +16,9 @@ export async function GET(request) {
   }
 
   try {
-    const r = await prewarmArticles({ limit: 10, sinceHours: 48, budgetMs: 50000 });
+    // Keep this small: free AI tiers have tight per-minute token limits, and the
+    // bulk of the budget must stay free for real user (on-click) generation.
+    const r = await prewarmArticles({ limit: 3, budgetMs: 45000 });
     return Response.json({ ok: true, ...r });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 500 });

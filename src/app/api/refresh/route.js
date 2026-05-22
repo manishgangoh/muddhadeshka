@@ -23,7 +23,7 @@ export async function GET(request) {
     const total = await countArticles();
     // Bonus: pre-generate a few of the freshly-added articles in the remaining time
     // budget (the dedicated /api/prewarm cron does the bulk of the work).
-    after(async () => { try { await prewarmArticles({ limit: 4, budgetMs: 12000 }); } catch { /* best-effort */ } });
+    after(async () => { try { await prewarmArticles({ limit: 2, budgetMs: 12000 }); } catch { /* best-effort */ } });
     return Response.json({ ok: true, inserted, total, results });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 500 });

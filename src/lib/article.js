@@ -41,7 +41,7 @@ export async function buildArticleContent(slugOrArticle) {
 // generated lazily on first click instead, so the agent's whole time budget
 // always goes to what users actually see. Time-budgeted so it never overruns
 // the serverless function limit.
-export async function prewarmArticles({ limit = 10, budgetMs = 50000 } = {}) {
+export async function prewarmArticles({ limit = 3, budgetMs = 45000 } = {}) {
   const start = Date.now();
   let generated = 0;
   for (const sinceHours of [6, 24]) {
