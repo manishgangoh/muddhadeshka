@@ -6,6 +6,7 @@ import { CAT, Tag, hrefFor } from "@/components/ui";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import GenerateArticle from "@/components/GenerateArticle";
+import ArticleBody from "@/components/ArticleBody";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // background AI article generation runs via after()
@@ -75,7 +76,6 @@ export default async function ArticlePage({ params, searchParams }) {
   }
 
   const points = dPoints;
-  const paragraphs = dBody.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   const related = await getRelated({ lang, category: a.category, excludeSlug: slug, limit: 6 });
   const catLabel = CAT[a.category]?.label || "";
 
@@ -158,8 +158,8 @@ export default async function ArticlePage({ params, searchParams }) {
           )}
 
           {/* Body */}
-          <div className="mt-5 space-y-4 text-[17px] leading-8 text-zinc-800">
-            {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          <div className="mt-5">
+            <ArticleBody text={dBody} />
           </div>
 
           {/* Source button */}
